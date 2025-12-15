@@ -1,0 +1,89 @@
+{
+  "cookies": [
+    {
+      "name": "m",
+      "value": "49e6ff48-78d4-4229-a0ad-f7f41b34f1d007c1a0",
+      "domain": "m.stripe.com",
+      "path": "/",
+      "expires": 1799998865.922203,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "__stripe_mid",
+      "value": "4d65cf80-354e-4dcb-87f0-75716baea085b461e0",
+      "domain": ".talbot-dev.atcemr.com",
+      "path": "/",
+      "expires": 1796974865,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "__stripe_sid",
+      "value": "e912d4d7-55f6-45ff-bccd-20651f58f64c7cab2b",
+      "domain": ".talbot-dev.atcemr.com",
+      "path": "/",
+      "expires": 1765440665,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://talbot-dev.atcemr.com",
+      "localStorage": [
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.fd1dev_atc.com.accessToken",
+          "value": "eyJraWQiOiIxYWQ1R1pHR2JQSXJQNUpuMFVHc3U3VFAxTEZBMEEzNFVscE1FaWdyeTJZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MDE1NTYxMy05ZDY1LTQ3MjctYTMxOS02NGQzMWY0MWVmYWYiLCJjb2duaXRvOmdyb3VwcyI6WyJQUk9WSURFUi1USCJdLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0yLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMl8yV0RNbU1INnIiLCJjbGllbnRfaWQiOiI3Y3Q3dmNwNzQ5b29rajFtMmRvOWVzdWJqZSIsImV2ZW50X2lkIjoiYThlMTI0NTEtMjAxOC00ZmE5LTg4ZjUtNmYzOTJlYzFmZWQwIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJhd3MuY29nbml0by5zaWduaW4udXNlci5hZG1pbiIsImF1dGhfdGltZSI6MTc2NTQzODg4NywiZXhwIjoxNzY1NDQyNDg4LCJpYXQiOjE3NjU0Mzg4ODgsImp0aSI6ImNjYTljMzJhLTQxNDAtNDBjZi1hNWY1LTA5NTAzMzhiNmRlYyIsInVzZXJuYW1lIjoiZmQxZGV2X2F0Yy5jb20ifQ.WPxdMb2TtAy2tA1tEXLpJVHzOv2MbfdiYsbMwftGJO_29M9yKmGfNnTJnuWU0W6BAUggdGMrIOEKWkee7jMcpkFxtEGrHpk3fxbuBNqykUcSmNXT5tUYm7QDkf9MiRRMJDBZwN6F6IJMJnKDDK1C99vcreRv31WSw5pPcCxlR-3IV3cZrmWk69L1XYKl0aF14Y0StkdpYwOqPxdMfgcf9dFZuIFJZAPkNPiXVOXZFzMZB0z3t1dq7hoc58L1rium7PFTTgbNXQJJzPSmQu7e7Suw5VImWC4llC52CzcA9T290fbSD8oQvGGFcU-6a8FFgD4TcH-neqs9j9ziIfQqkg"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.LastAuthUser",
+          "value": "fd1dev_atc.com"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.fd1dev_atc.com.refreshToken",
+          "value": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.JajBCFlvnB5Zn9eDQLrkVSGhiE2Ep7JvsAtlpmtJCdxA7ieHax9VFZ6cnilNxhx5Y7unMnr1POy1nulFvlo0pp7hoTwnTbDngaLRF0IiGrpRvLW__J8qLJklbhKDgUMi6bJPGK9ESmcIhZqJ1NDRdR6_JsZORG45yHISDLTngHrOurCJQScCKBGK0I1apl1p4_Qt01Y3WNS1mUnqbMSkXfvelWha2iZ9-C1zt24PSzRL9Vh-pmfxmPvhHATWNuI8O6-o9BdVUuxq96O0KV5Gl5hRK_FQyyHszG77WKxAeiDLd2FdzeY_ZE50uZVwfQTU85nM8dPFwALe45Lld2wcKQ.K_IVLcYopf4Jc2GI.jAwEt4x5PIx5ZBl-qFlRN0pCQgp6PCU2m3gzFArLaqYYof-uY4hSjwAgoEvAqfKg_yIcLHMtz4sGvOP6oPmlapgsOtHsWH--OZzXKkXaOCIhYGHsO3SfpJIvLCBMLrBaJAbHQOaK-4ImdPLW8ONTivLR89GF1hSNzxgeCVJryebymBJCYOcLZWKryu8U5tpGDASKyRezYiH9TC9fkSM9yZwHDkAGDzImqLy9v2kfYw59QJQupqW0x_5TPsgzg6FWVK3SeU9UdgmmVjPzQCuKblPkyN1FVfqORgewWMX8Xj8VN-c7i_jcvuJWo8FTG0oIONxBSEsnLIiUQgr1OyqPyDwn0dSfn93pAZyiLJj8ihG57EHdosR8tn5xzFIMLZsPBETnqt4CAtESUeEJfheo0-gavt9RsKM-Kg2DHSwogEtcCtRJmZISSZexMLvU1TGzyjsL0rQs2m6S8U7900HEqsy9rScOd-z0VJiu73FwZjBAmoUm7oWpf8LdNM8yLZZMQtJ0-0pPvWHFvgBS7GsXoLFB8gRujHfU9LDFKRZplodCzVhwLRCyc-Bm_tRkjAdisefFMi7H34VzPhVzXUgjYVZFAjTJM6HeB1h2Zb24Ousd_kI_4U54R8nHjGgBddIBNszF3PA7dLq-tk-K1KKQuFz7NYYrNY-vMTiHzcJ_NKLqKYCnPHdg5yRyrTamA4DzczNAm-sDwMABJ8WV6GKiwLZqkpTmFIx-kJ0bpqJ1qgcPe26yWjHGSIaW8LcCbb4vY16cx_Edok9pJv1-y0QwPjQCpgiFJEbc0UWsyR1DD7rw5V2rNV1ReJ2BkNDpREQ0WmN0ivjnVubj75wEKdBXUVNiLvNLuKAssV335IHmJVHwHvYvnIdvEiKKHWAmwP-yyUJHI0pidPUR_wXpjgeHauKoF1hsrw2b_pPQgyArOwk7jl3qYMEyUU4ZHP_KoH_PPm9pcD5txlUWvb-667VIChLrwQCKGSvuqWuVoYLto_ZV3ajyiGr_kzpJA_RiUbIZ1bOfiUdfT6XnCkH259lGwbPyOQpr5uEaN-2YVaTFz4fb5YRTDo2zOMEwfOfSK9JANs3Y-rsxxEQOcvsbZptIMIzpz1ih5BJthnQQu9nBpfYabVzNcryRkyjDgD4ZQBhejDDQs8B-s44iMchJ9qQWZ3FuIGffhk6R5AFthBZQj10sWnsxNpWtNnJvD-3tBD-7NwQdVCN53LtIitW54QXul1RuL_bnMM4vti6PP7CfS8c3ouRPcNKOTON7ovePuRTW_pgfpOyezbJePJebkpk.S3CGpIMYK7cZEENzH_2g9A"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.fd1dev_atc.com.userData",
+          "value": "{\"UserAttributes\":[{\"Name\":\"sub\",\"Value\":\"90155613-9d65-4727-a319-64d31f41efaf\"},{\"Name\":\"email_verified\",\"Value\":\"True\"},{\"Name\":\"custom:EmrUserId\",\"Value\":\"264\"},{\"Name\":\"custom:Roles\",\"Value\":\"AFD\"},{\"Name\":\"email\",\"Value\":\"fd1dev@atc.com\"},{\"Name\":\"custom:ProviderId\",\"Value\":\"185\"}],\"Username\":\"fd1dev_atc.com\"}"
+        },
+        {
+          "name": "providerId",
+          "value": "185"
+        },
+        {
+          "name": "amplify-signin-with-hostedUI",
+          "value": "false"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.fd1dev_atc.com.clockDrift",
+          "value": "1"
+        },
+        {
+          "name": "userId",
+          "value": "264"
+        },
+        {
+          "name": "CognitoIdentityServiceProvider.7ct7vcp749ookj1m2do9esubje.fd1dev_atc.com.idToken",
+          "value": "eyJraWQiOiJPdldPeitYQzh3aENVKzMrQndMQW5pVmZRVnRRd2VWendLOHdnWmFWNHFNPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MDE1NTYxMy05ZDY1LTQ3MjctYTMxOS02NGQzMWY0MWVmYWYiLCJjb2duaXRvOmdyb3VwcyI6WyJQUk9WSURFUi1USCJdLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiY3VzdG9tOkVtclVzZXJJZCI6IjI2NCIsImN1c3RvbTpSb2xlcyI6IkFGRCIsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0yXzJXRE1tTUg2ciIsImNvZ25pdG86dXNlcm5hbWUiOiJmZDFkZXZfYXRjLmNvbSIsImN1c3RvbTpQcm92aWRlcklkIjoiMTg1IiwiYXVkIjoiN2N0N3ZjcDc0OW9va2oxbTJkbzllc3ViamUiLCJldmVudF9pZCI6ImE4ZTEyNDUxLTIwMTgtNGZhOS04OGY1LTZmMzkyZWMxZmVkMCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNzY1NDM4ODg3LCJleHAiOjE3NjU0NDI0ODgsImlhdCI6MTc2NTQzODg4OCwiZW1haWwiOiJmZDFkZXZAYXRjLmNvbSJ9.pFtzjk6k7DZyVYzZR_eSxXo_v6xUpG1pmsgEDRdmzpVvTLoeXqLprgvqxDhKEcSCuUen7JtxpNcRcu8HOgEHA7O0GgsvjQRRry5RWhrRIvx0SHwF0qbJiGLoyuUOIWcxdRv3C15nXg8pLr07kaBvYOcIGEDEvYYX5-e2_X2MoQS2BFugj4Qqq6Moo2YEzr3_BKLAJmDzb8JIxq6sy4VLGnyMkgqSe4n8sB8x2YMKDV4A4TfPvW8-GZb8uWVuo0s2tHIBGhoH5pnRdAXlQb6gMgVOxZLYXBlxFQBqscqmJH1LzxM3rtX5QgDJbLbdep-tK3je01rVdp996VUg4phtcQ"
+        },
+        {
+          "name": "clinicianId",
+          "value": "3041824"
+        },
+        {
+          "name": "TFApopupOpen",
+          "value": "true"
+        },
+        {
+          "name": "versionCheck",
+          "value": "0.0.1"
+        }
+      ]
+    }
+  ]
+}
