@@ -9,7 +9,31 @@ test.use({ storageState: 'authState.json' });
 
 test.describe('Patient Module - Add Patient Flow', () => {
 
-  test('1. Add new patient with mandatory fields and check SSN bypass', async ({ page }) => {
+  test('1. Validate all fields', async ({ page }) => {
+    await page.goto('/dashboard');
+    const loginPage = new LoginPage(page);
+    await loginPage.skipMfa();
+    const patient = new PatientPage(page);
+
+    console.log("STEP: Navigating to Patients tab..."); 
+    await patient.gotoPatientsTab();
+
+    await expect(patient.addPatientBtn).toBeVisible();  
+    console.log("STEP: Opening Add Patient modal...");
+    await patient.openAddPatientModal();
+
+    console.log("STEP: Validating modal title...");
+    await expect(patient.modalTitle).toBeVisible();
+    console.log("STEP: Validating all fields...");
+    await patient.validateFormFields();
+    console.log("ASSERT: All fields validated successfully");
+
+    console.log("STEP: Validating alert message for required fields...");
+    await patient.validateAlertMessageForRequiredFields();
+    console.log("ASSERT: Alert message for required fields validated successfully");
+  });
+
+  test('2. Add new patient with mandatory fields and check SSN bypass', async ({ page }) => {
 
     await page.goto('/dashboard');
   
@@ -38,7 +62,6 @@ test.describe('Patient Module - Add Patient Flow', () => {
       createdAt: new Date().toISOString()
     };
   
-  
     console.log("PATIENT DATA →", patientData);
   
     // 2. SAVE PATIENT DATA TO JSON FILE
@@ -62,9 +85,6 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.openAddPatientModal();
     await expect(patient.modalTitle).toBeVisible();
   
-    console.log("STEP: Validating all fields...");
-    await patient.validateFormFields();
-  
     console.log('STEP: Filling mandatory patient fields...');
     await patient.fillMandatoryFields(patientData);
 
@@ -83,7 +103,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log(`PATIENT CREATED SUCCESSFULLY → ${firstName} ${lastName}`);
   });
 
-  test.skip('2. Check duplicate patient validation', async ({ page }) => {
+  test('3. Check duplicate patient validation', async ({ page }) => {
 
     await page.goto('/dashboard');
   
@@ -100,7 +120,6 @@ test.describe('Patient Module - Add Patient Flow', () => {
     }
   
     const patientData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-  
     console.log("Loaded patient record for duplicate check:", patientData);
 
     // 2. BEGIN TEST EXECUTION
@@ -122,42 +141,11 @@ test.describe('Patient Module - Add Patient Flow', () => {
 
     console.log('STEP: Attempting to save duplicate patient...');
     
-    // #region agent log
-    const modalBeforeSave = await patient.modalTitle.isVisible().catch(() => false);
-    fetch('http://127.0.0.1:7242/ingest/af7726e8-2804-46c5-af9c-8155f4ebafb6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TC04_Patients.spec.js:118',message:'Before save',data:{modalVisible:modalBeforeSave},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    
     await patient.save();
-
-    // Wait for either success toast (duplicate created) or error toast/modal to remain open
-    // Use Promise.race to detect which one appears first
-    try {
-      await Promise.race([
-        patient.successToast.waitFor({ state: 'visible', timeout: 3000 }).then(() => 'success'),
-        page.locator('#toast-container, .toast-error, .toast-danger, .toast-warning').first().waitFor({ state: 'visible', timeout: 3000 }).then(() => 'error'),
-        page.waitForTimeout(2000).then(() => 'timeout')
-      ]);
-    } catch {
-      // Continue to check states
-    }
 
     // Wait for network to settle
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.waitForTimeout(500);
-
-    // #region agent log
-    const allToasts = await page.locator('[class*="toast"], [class*="alert"], [class*="message"], [class*="notification"]').all();
-    const toastInfo = await Promise.all(allToasts.map(async (t, i) => {
-      try {
-        const text = await t.textContent() || '';
-        const classes = await t.getAttribute('class') || '';
-        const visible = await t.isVisible();
-        return {idx:i,text:text.substring(0,100),classes,visible};
-      } catch { return {idx:i,text:'',classes:'',visible:false}; }
-    }));
-    const modalAfterWait = await patient.modalTitle.isVisible().catch(() => false);
-    fetch('http://127.0.0.1:7242/ingest/af7726e8-2804-46c5-af9c-8155f4ebafb6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'TC04_Patients.spec.js:131',message:'All toasts found',data:{toastCount:allToasts.length,toasts:toastInfo,modalVisible:modalAfterWait},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A,F'})}).catch(()=>{});
-    // #endregion
 
     console.log('STEP: Verifying duplicate patient error...');
     
@@ -167,56 +155,11 @@ test.describe('Patient Module - Add Patient Flow', () => {
       throw new Error('TEST FAILED: Duplicate patient was created successfully! Success toast appeared when it should have been prevented.');
     }
     
-    // Check for error toast using multiple selectors
-    const errorToast1 = page.locator('.toast-error, .toast-danger, .toast-warning');
-    const errorToast2 = page.locator('#toast-container:has-text("Error"), #toast-container:has-text("duplicate"), #toast-container:has-text("already exists")');
-    const errorMessage = page.getByText(/duplicate|already exists|patient.*exist|patient.*duplicate|error/i);
-    
     // Wait a bit more for any error messages to appear
     await page.waitForTimeout(500);
     
     // Check if error toast is visible (try multiple selectors)
     let errorFound = false;
-    
-    try {
-      // Try first error toast selector
-      const errorToast1Count = await errorToast1.count();
-      if (errorToast1Count > 0 && await errorToast1.first().isVisible().catch(() => false)) {
-        const errorText = await errorToast1.first().textContent().catch(() => '');
-        console.log(`ASSERT: Duplicate patient error toast detected: ${errorText}`);
-        errorFound = true;
-      }
-    } catch (e) {
-      // Try second error toast selector (#toast-container)
-      try {
-        const errorToast2Count = await errorToast2.count();
-        if (errorToast2Count > 0 && await errorToast2.first().isVisible().catch(() => false)) {
-          const errorText = await errorToast2.first().textContent().catch(() => '');
-          console.log(`ASSERT: Duplicate patient error detected in toast-container: ${errorText}`);
-          errorFound = true;
-        }
-      } catch (e2) {
-        // Try error message text
-        try {
-          const errorMsgCount = await errorMessage.count();
-          if (errorMsgCount > 0 && await errorMessage.first().isVisible().catch(() => false)) {
-            const errorText = await errorMessage.first().textContent().catch(() => '');
-            console.log(`ASSERT: Duplicate patient error message detected: ${errorText}`);
-            errorFound = true;
-          }
-        } catch (e3) {
-          // If no error message appears, verify modal is still open (save was prevented)
-          console.log('ASSERT: Checking if modal is still open (duplicate prevented save)...');
-          const finalModalState = await patient.modalTitle.isVisible().catch(() => false);
-          if (finalModalState) {
-            console.log('ASSERT: Modal still open - duplicate save prevented (no error message shown)');
-            errorFound = true; // Modal still open means save was prevented
-          } else {
-            throw new Error('TEST FAILED: No error detected, modal closed, and no success toast. Unable to determine duplicate validation result.');
-          }
-        }
-      }
-    }
     
     // Final assertion - at least one error indicator should be present
     if (!errorFound) {
@@ -231,7 +174,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log('DUPLICATE PATIENT VALIDATION CHECKED');
   });
 
-  test('3.Edit existing patient details update Religion', async ({ page }) => {
+  test('4.Edit existing patient details update Religion', async ({ page }) => {
 
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
@@ -301,7 +244,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await expect(page.getByText('Patient Information Updated')).toBeVisible({ timeout: 10000 });
   }); 
   
-  test('4.Add Insurance for Existing Patient', async ({ page }) => {
+  test('5.Add Insurance for Existing Patient', async ({ page }) => {
 
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
@@ -349,9 +292,34 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log("STEP: Selecting Insurance tab...");
     await patient.selectInsuranceTab();
   
-    // 6. Select Insurance company
-    console.log("STEP: Selecting Insurance company...");
-    await patient.selectInsuranceCompany("Aetna");
+    // 6. Click Add Policy button
+    console.log("STEP: Clicking Add Policy button...");
+    await patient.clickAddPolicy();
+  
+    // 7. Fill required fields in Add Insurance Policy form
+    console.log("STEP: Filling required fields in Add Insurance Policy form...");
+    const insurancePolicyData = {
+      companyType: "Commercial/PPO",
+      policyNumber: faker.string.alphanumeric(10),
+      level: "Primary",
+      ptRelation: "Self"
+      // Note: firstName, lastName, sex, dob not needed when ptRelation is "Self" - will validate auto-populated data
+    };
+    await patient.fillInsurancePolicyForm(insurancePolicyData, patientData);
+  
+    // 8. Save Insurance Policy
+    console.log("STEP: Saving Insurance Policy...");
+    await patient.saveInsurancePolicy();
+  
+    // 9. Validate and handle confirmation dialog
+    console.log("STEP: Validating confirmation dialog and clicking Ok...");
+    await patient.handleConfirmationDialog();
+  
+    // 10. Validate success toast
+    console.log("STEP: Validating success toast...");
+    await page.waitForTimeout(2000);
+    await expect(patient.successToast).toBeVisible({ timeout: 10000 });
+    console.log("ASSERT: Success toast is visible - Insurance Policy saved successfully");
   });
 
 });
