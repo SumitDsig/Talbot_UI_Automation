@@ -7,7 +7,7 @@ test.use({ storageState: 'authState.json' });
 
 test.describe('Patients Page - Work Menu Validation', () => {
 
-  test('Validate Work menu options on Patients page', async ({ page }) => {
+  test('TC25. Validate Work menu options on Patients page', async ({ page }) => {
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
     await loginPage.skipMfa();
@@ -99,7 +99,6 @@ test.describe('Patients Page - Work Menu Validation', () => {
         await workMenuPage.openWorkMenu();
       }
     }
-
     console.log('\n✓ All Work menu options validated successfully');
   });
 

@@ -4,7 +4,7 @@ const { HeaderMenuPage } = require('../pages/HeaderMenuPage');
 
 test.use({ storageState: 'authState.json' });
 
-test('TC011 verify header menus', async ({ page }) => {
+test('TC11 verify header menus', async ({ page }) => {
   const loginPage = new LoginPage(page);
   const headerMenuPage = new HeaderMenuPage(page);
 
@@ -28,7 +28,7 @@ test('TC011 verify header menus', async ({ page }) => {
   await headerMenuPage.verifyAvatar();
 });
 
-test('TC012 navigate and validate all overflow menu items URLs', async ({ page }) => {
+test('TC12 navigate and validate all overflow menu items URLs', async ({ page }) => {
   const loginPage = new LoginPage(page);
   const headerMenuPage = new HeaderMenuPage(page);
 
@@ -46,9 +46,9 @@ test('TC012 navigate and validate all overflow menu items URLs', async ({ page }
   console.log(`\n✅ Test completed: ${result.validatedItems.length} menu items successfully validated`);
 });
 
-test('TC013 navigate and validate Reports menu items and URLs', async ({ page }) => {
+test('TC13 navigate and validate Reports menu items and URLs', async ({ page }) => {
   // Set longer timeout for this test as it validates many menu items
-  test.setTimeout(240000); // 4 minutes
+  test.setTimeout(300000); // 5 minutes
 
   const loginPage = new LoginPage(page);
   const headerMenuPage = new HeaderMenuPage(page);

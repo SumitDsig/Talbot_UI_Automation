@@ -9,7 +9,7 @@ test.use({ storageState: 'authState.json' });
 
 test.describe('Patient Module - Add Patient Flow', () => {
 
-  test('1. Validate all fields', async ({ page }) => {
+  test('TC20. Validate all fields', async ({ page }) => {
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
     await loginPage.skipMfa();
@@ -33,7 +33,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log("ASSERT: Alert message for required fields validated successfully");
   });
 
-  test('2. Add new patient with mandatory fields and check SSN bypass', async ({ page }) => {
+  test('TC21. Add new patient with mandatory fields and check SSN bypass', async ({ page }) => {
 
     await page.goto('/dashboard');
   
@@ -103,7 +103,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log(`PATIENT CREATED SUCCESSFULLY → ${firstName} ${lastName}`);
   });
 
-  test('3. Check duplicate patient validation', async ({ page }) => {
+  test('TC22. Check duplicate patient validation', async ({ page }) => {
 
     await page.goto('/dashboard');
   
@@ -172,7 +172,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log('DUPLICATE PATIENT VALIDATION CHECKED');
   });
 
-  test('4. Edit existing patient details update Religion', async ({ page }) => {
+  test('TC23. Edit existing patient details update Religion', async ({ page }) => {
 
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
@@ -241,7 +241,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await expect(page.getByText('Patient Information Updated')).toBeVisible({ timeout: 10000 });
   }); 
   
-  test('5. Add Insurance for Existing Patient', async ({ page }) => {
+  test('TC24. Add Insurance for Existing Patient', async ({ page }) => {
 
     await page.goto('/dashboard');
     const loginPage = new LoginPage(page);
