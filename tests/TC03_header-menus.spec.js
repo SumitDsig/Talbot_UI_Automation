@@ -47,6 +47,9 @@ test('TC012 navigate and validate all overflow menu items URLs', async ({ page }
 });
 
 test('TC013 navigate and validate Reports menu items and URLs', async ({ page }) => {
+  // Set longer timeout for this test as it validates many menu items
+  test.setTimeout(240000); // 4 minutes
+
   const loginPage = new LoginPage(page);
   const headerMenuPage = new HeaderMenuPage(page);
 

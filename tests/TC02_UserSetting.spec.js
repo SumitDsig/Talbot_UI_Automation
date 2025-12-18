@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
 /* -----------------------------------------------------
    TEST 1 — Validate User Settings UI
 ----------------------------------------------------- */
-test('1. Validate feilds of Digital Signature Section ', async ({ page }) => {
+test('TC05 Validate feilds of Digital Signature Section ', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log('➡️ Clicking Avatar icon...');
@@ -74,7 +74,7 @@ test('1. Validate feilds of Digital Signature Section ', async ({ page }) => {
 /* -----------------------------------------------------
    TEST 2 — Canvas Draw + Clear Validation
 ----------------------------------------------------- */
-test('2. Validate canvas: sign, clear, and confirm canvas is empty', async ({ page }) => {
+test('TC06 Validate canvas: sign, clear, and confirm canvas is empty', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log('➡️ Opening User Settings modal...');
@@ -110,7 +110,7 @@ test('2. Validate canvas: sign, clear, and confirm canvas is empty', async ({ pa
 /* -----------------------------------------------------
    TEST 3 — Save Signature Without PIN
 ----------------------------------------------------- */
-test('3. Draw on canvas then save signature and validate toaster error', async ({ page }) => {
+test('TC07 Draw on canvas then save signature and validate toaster error', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log('➡️ Opening User Settings modal...');
@@ -134,7 +134,7 @@ test('3. Draw on canvas then save signature and validate toaster error', async (
 /* -----------------------------------------------------
    TEST 4 — Save Signature WITH PIN (Success)
 ----------------------------------------------------- */
-test('4. Draw on canvas, enter PIN, save signature, and validate success toaster', async ({ page }) => {
+test('TC08 Draw on canvas, enter PIN, save signature, and validate success toaster', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log('➡️ Opening User Settings modal...');
@@ -164,7 +164,7 @@ test('4. Draw on canvas, enter PIN, save signature, and validate success toaster
 /* -----------------------------------------------------
    TEST 5 — Validate Left Menu Options
 ----------------------------------------------------- */
-test('5. Validate left menu options', async ({ page }) => {
+test('TC09 Validate left menu options', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log("➡️ Validating left menu items...");
@@ -181,7 +181,7 @@ test('5. Validate left menu options', async ({ page }) => {
 /* -----------------------------------------------------
    TEST 6 — Provider Availability Workflow
 ----------------------------------------------------- */
-test('6. Validate Provider Availability and add new availability', async ({ page }) => {
+test('TC10 Validate Provider Availability and add new availability', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   await dashboard.avatarIcon.click();

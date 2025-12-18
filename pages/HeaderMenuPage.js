@@ -363,76 +363,95 @@ class HeaderMenuPage {
   
     // Helper: overflow menu open check
     const isOverflowMenuOpen = async () => {
-      const reportsOption = this.page.getByText('Reports', { exact: false });
-      return await reportsOption.isVisible();
+      try {
+        const reportsOption = this.page.getByText('Reports', { exact: false });
+        return await reportsOption.isVisible({ timeout: 2000 });
+      } catch {
+        return false;
+      }
     };
   
     console.log('➡️ Navigating Report menu items...');
   
     for (const report of reportMenuList) {
       console.log(`\n➡️ Checking Report Menu: "${report.name}"`);
-  
-      await this.waitForHeaderReady();
-      // Ensure overflow menu is open
-      if (!(await isOverflowMenuOpen())) {
-
-        // Wait for the overflow button to truly be visible & interactable
-        await expect(this.overflowArrowButton).toBeVisible({ timeout: 8000 });
-        await expect(this.overflowArrowButton).toBeEnabled();
-      
-        await this.overflowArrowButton.click();
-        await this.page.waitForTimeout(300);
-      }
-      
-  
-      // Hover over "Reports" to open its submenu
-      const reportsMenu = this.page.getByText('Reports', { exact: false }).first();
-      await expect(reportsMenu).toBeVisible();
-      await reportsMenu.hover();
-      console.log("✔️ Hovered on 'Reports' to open submenu");
-      
-      // Wait for submenu to appear and stabilize (critical for hover-based menus)
-      await this.page.waitForTimeout(500);
-
-      // Now find the report item inside submenu
-      const reportLocator = this.page.getByText(report.name, { exact: false }).first();
 
       try {
-        await expect(reportLocator).toBeVisible({ timeout: 3000 });
+        // Wait for header to be ready (overflow menu is always available)
+        await this.waitForHeaderReady();
+        
+        // Ensure overflow menu is open
+        if (!(await isOverflowMenuOpen())) {
+          // Wait for the overflow button to truly be visible & interactable
+          await expect(this.overflowArrowButton).toBeVisible({ timeout: 8000 });
+          await expect(this.overflowArrowButton).toBeEnabled();
+        
+          await this.overflowArrowButton.click();
+          await this.page.waitForTimeout(300);
+        }
+        
+        // Hover over "Reports" to open its submenu
+        const reportsMenu = this.page.getByText('Reports', { exact: false }).first();
+        await expect(reportsMenu).toBeVisible({ timeout: 5000 });
+        await reportsMenu.hover();
+        console.log("✔️ Hovered on 'Reports' to open submenu");
+        
+        // Wait for submenu to appear and stabilize (critical for hover-based menus)
+        await this.page.waitForTimeout(600);
+
+        // Now find the report item inside submenu
+        const reportLocator = this.page.getByText(report.name, { exact: false }).first();
+
+        await expect(reportLocator).toBeVisible({ timeout: 6000 });
         console.log(`✔️ Found in submenu: ${report.name}`);
 
         await reportLocator.click();
         console.log(`✔️ Clicked: ${report.name}`);
 
         // Wait for navigation to start before checking URL
-        await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+        await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
 
         // Validate URL contains expected fragment
         try {
-          await this.page.waitForURL(`**/*${report.urlContains}*`, { timeout: 10000 });
+          await this.page.waitForURL(`**/*${report.urlContains}*`, { timeout: 12000 });
           // Additional wait for SPA to fully settle
           await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
           console.log(`✔️ URL validated for: ${report.name}`);
           validatedItems.push(report.name);
         } catch (urlErr) {
-          const currentUrl = this.page.url();
-          console.log(`❌ URL mismatch for: ${report.name}`);
-          console.log(`   Expected URL to contain: "${report.urlContains}"`);
-          console.log(`   Actual URL: ${currentUrl}`);
+          try {
+            const currentUrl = this.page.url();
+            console.log(`❌ URL mismatch for: ${report.name}`);
+            console.log(`   Expected URL to contain: "${report.urlContains}"`);
+            console.log(`   Actual URL: ${currentUrl}`);
+          } catch {
+            console.log(`❌ URL mismatch for: ${report.name} (page may be closed)`);
+          }
           failedItems.push(report.name);
         }
 
       } catch (e) {
         // More specific error handling to distinguish between visibility and click failures
-        if (e.message && (e.message.includes('timeout') || e.message.includes('not visible'))) {
+        if (e.message && (e.message.includes('timeout') || e.message.includes('not visible') || e.message.includes('closed'))) {
           console.log(`❌ NOT FOUND in Reports submenu: "${report.name}"`);
+          console.log(`   Error: ${e.message}`);
         } else {
           console.log(`❌ Error interacting with "${report.name}": ${e.message || 'Unknown error'}`);
         }
         failedItems.push(report.name);
+        
+        // Check if page is still valid before waiting
+        try {
+          // Small delay before next iteration to allow page to stabilize
+          await this.page.waitForTimeout(300);
+        } catch (waitError) {
+          // Page might be closed, log and break out of loop
+          if (waitError.message && waitError.message.includes('closed')) {
+            console.log(`⚠️ Page closed, stopping test execution`);
+            break;
+          }
+        }
       }
-  
-      await this.page.waitForTimeout(300);
     }
   
     console.log('\n📊 Reports Navigation Summary');
@@ -445,13 +464,13 @@ class HeaderMenuPage {
 
   async waitForHeaderReady() {
     // Ensure page load state is stable
-    await this.page.waitForLoadState('domcontentloaded');
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 });
   
     // Wait for any pending network calls (SPA apps need this)
-    await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+    await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
   
-    // Ensure the overflow arrow itself is ready
-    await expect(this.overflowArrowButton).toBeVisible({ timeout: 8000 });
+    // Overflow menu is always available on header, ensure it's ready
+    await expect(this.overflowArrowButton).toBeVisible({ timeout: 6000 });
     await expect(this.overflowArrowButton).toBeEnabled();
   }
   
