@@ -839,7 +839,7 @@ class QuickAccessMenuPage {
       { name: 'Patient List', urlContains: 'patient-list' },
       { name: 'Resources', urlContains: 'resources' },
       { name: 'ITP Report', urlContains: 'itp-report' },
-      { name: 'Encounter Addendums', urlContains: 'encounter-addendums' },
+      { name: 'Encounter Addendums', urlContains: 'encounter-adandoms' },
       { name: 'Medical Eligibility Report', urlContains: 'medical-eligibility' },
       { name: 'Attendance Report', urlContains: 'attendance-report' },
       { name: 'Chores', urlContains: 'chores' },

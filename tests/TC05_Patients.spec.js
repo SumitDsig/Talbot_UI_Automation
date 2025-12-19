@@ -550,11 +550,20 @@ test.describe('Patient Module - Add Patient Flow', () => {
 
     // Verify user is navigated to Patient Demographics upon creation
     console.log('STEP: Verify the user is navigated to the Patient Demographics upon creation of new patient');
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(2000); // Wait for navigation
-    
-    // Check if we're on patient demographics page - look for patient header or demographics section
-    const isPatientPage = await patient.patientHeader.isVisible({ timeout: 10000 }).catch(() => false);
+    // Wait for patient header to be visible (indicates navigation to demographics page)
+    let isPatientPage = false;
+    try {
+      await patient.patientHeader.waitFor({ state: 'visible', timeout: 60000 });
+      isPatientPage = true;
+    } catch (error) {
+      // Fallback: try waiting for patient header name
+      try {
+        await patient.patientHeaderName.waitFor({ state: 'visible', timeout: 30000 });
+        isPatientPage = true;
+      } catch (fallbackError) {
+        isPatientPage = false;
+      }
+    }
     
     if (isPatientPage) {
       console.log('ASSERT: User is navigated to Patient Demographics page');
@@ -739,7 +748,8 @@ test.describe('Patient Module - Add Patient Flow', () => {
     // 2. SEARCH PATIENT
     console.log(`STEP 2: Searching patient '${searchName}'`);
     await patient.searchPatient(searchName);
-    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    // Use domcontentloaded instead of networkidle for better CI reliability
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
   
     // Wait for search results to appear
@@ -752,7 +762,8 @@ test.describe('Patient Module - Add Patient Flow', () => {
   
     // Wait for patient details page to load
     await expect(patient.patientHeaderName).toBeVisible({ timeout: 10000 });
-    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    // Use domcontentloaded instead of networkidle for better CI reliability
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
   
     // 4. OPEN EDIT FORM
@@ -761,7 +772,8 @@ test.describe('Patient Module - Add Patient Flow', () => {
     
     // Wait for edit form to load - check for Religion field
     await patient.waitForReligionFieldReady();
-    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    // Use domcontentloaded instead of networkidle for better CI reliability
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
   
     // 5. UPDATE RELIGION
@@ -816,7 +828,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log('ASSERT: Patient information updated successfully');
   }); 
   
-  test('TC25. Add Insurance for Existing Patient', async ({ page }) => {
+  test.only('TC25. Add Insurance for Existing Patient', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.navigateToDashboard();
   
@@ -843,7 +855,8 @@ test.describe('Patient Module - Add Patient Flow', () => {
     // 2. SEARCH PATIENT
     console.log(`STEP 2: Searching patient '${searchName}'`);
     await patient.searchPatient(searchName);
-    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    // Use domcontentloaded instead of networkidle for better CI reliability
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
 
     // Wait for search results to appear

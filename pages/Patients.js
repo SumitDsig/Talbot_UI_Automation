@@ -613,7 +613,8 @@ class PatientPage {
     console.log(`ACTION: Updating Religion to: ${religion}`);
 
     // 1. Wait for page load so dropdown is visible
-    await this.page.waitForLoadState("networkidle");
+    // Use domcontentloaded instead of networkidle for better CI reliability
+    await this.page.waitForLoadState("domcontentloaded", { timeout: 30000 });
     await this.waitForReligionFieldReady();
     await expect(this.religionDropdown).toBeVisible();
 
@@ -669,8 +670,8 @@ class PatientPage {
     console.log('ACTION: Clicking Insurance tab...');
     await expect(this.insuranceTab).toBeVisible();
     await this.insuranceTab.click();
-    // Wait for Insurance tab content to load
-    await this.page.waitForLoadState("networkidle");
+    // Wait for Insurance tab content to load - wait for DOM instead of networkidle
+    await this.page.waitForLoadState("domcontentloaded", { timeout: 30000 });
     await this.page.waitForTimeout(1000);
   }
 
@@ -686,8 +687,8 @@ class PatientPage {
   async fillInsurancePolicyForm(data, patientData = null) {
     console.log('ACTION: Filling Insurance Policy form...');
 
-    // Wait for modal to be ready
-    await this.page.waitForLoadState("networkidle");
+    // Wait for modal to be ready - use domcontentloaded instead of networkidle
+    await this.page.waitForLoadState("domcontentloaded", { timeout: 30000 });
     await expect(this.addInsurancePolicyModal).toBeVisible();
     await this.page.waitForTimeout(2000);
 
@@ -921,9 +922,8 @@ class PatientPage {
   async validateWorkMenuOptionLoads(optionText) {
     console.log(`VALIDATION: Validating ${optionText} loaded successfully...`);
     
-    // Wait for page/modal to load
-    await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(1000);
+    // Wait for page/modal to load - use domcontentloaded instead of networkidle
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 30000 });
     
     // Check for primary heading or key element
     const heading = this.page.locator('h1, h2, h3, h4, h5, .modal-title, .page-title, .card-title, [role="heading"]').first();
