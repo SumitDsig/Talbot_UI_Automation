@@ -828,7 +828,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log('ASSERT: Patient information updated successfully');
   }); 
   
-  test.only('TC25. Add Insurance for Existing Patient', async ({ page }) => {
+  test('TC25. Add Insurance for Existing Patient', async ({ page }) => {
     const loginPage = new LoginPage(page);
     await loginPage.navigateToDashboard();
   
