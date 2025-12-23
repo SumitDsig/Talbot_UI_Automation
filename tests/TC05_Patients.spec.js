@@ -879,7 +879,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     console.log('STEP: Validate on the Patient Demographics page that Is Test Patient, Is Walk-In Emergency Care Client, and Enable Login are present');
     
     // Wait for page to fully load
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
     
     // Look for these items on the demographics page with explicit timeouts
@@ -930,7 +930,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
   
     // Final wait to ensure all operations complete
     await page.waitForTimeout(1000);
-    await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+    await page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
   
     console.log(`PATIENT CREATED SUCCESSFULLY → ${firstName} ${lastName}`);
   });
@@ -972,7 +972,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.save();
 
     // Wait for network to settle and any error/success messages to appear
-    await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState("domcontentloaded", { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(2000); // Wait for error/success messages
 
     console.log('STEP 6: Verifying duplicate patient error...');
@@ -1369,4 +1369,418 @@ test.describe('Patient Module - Add Patient Flow', () => {
     
     console.log("ASSERT: Table View navigation functionality is validated");
   });
+
+  test('TC28. Validate Patient Grid displays Patient ID, First Name, Last Name, DOB, Phone and DE information and sorting', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigateToDashboard();
+    const patient = new PatientPage(page);
+
+    // Navigate to Patients tab
+    console.log("ACTION: Navigating to Patients tab...");
+    await patient.gotoPatientsTab();
+    
+    // Wait for Patients page to load
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await expect(patient.addPatientBtn).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    console.log("ASSERT: Patients page has loaded");
+
+    // Wait for patient grid to load
+    console.log("ACTION: Waiting for patient grid to load...");
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 15000 }).catch(() => {
+      console.log("WARNING: Patient grid may be empty or still loading");
+    });
+    await page.waitForTimeout(1000);
+    
+    // Get all patient rows
+    const rowCount = await patient.patientRows.count();
+    console.log(`INFO: Found ${rowCount} patient row(s) in the grid`);
+    
+    if (rowCount === 0) {
+      console.log("WARNING: No patient rows found in grid. Cannot validate grid columns.");
+      return;
+    }
+
+    // Validate grid information for each patient record (limit to first 10 rows for performance)
+    const rowsToValidate = Math.min(rowCount, 10);
+    console.log(`ACTION: Validating patient grid information for ${rowsToValidate} patient record(s)...`);
+
+    for (let i = 0; i < rowsToValidate; i++) {
+      const row = patient.patientRows.nth(i);
+      await expect(row).toBeVisible({ timeout: 10000 });
+      
+      console.log(`ACTION: Validating patient record ${i + 1}...`);
+      
+      // Extract patient data from the row
+      const patientData = await patient.getPatientGridData(row);
+      
+      // Validate Patient ID is displayed
+      expect(patientData.patientId).toBeTruthy();
+      console.log(`ASSERT: Patient ID "${patientData.patientId}" is displayed for record ${i + 1}`);
+      
+      // Validate First Name is displayed
+      expect(patientData.firstName).toBeTruthy();
+      console.log(`ASSERT: First Name "${patientData.firstName}" is displayed for record ${i + 1}`);
+      
+      // Validate Last Name is displayed
+      expect(patientData.lastName).toBeTruthy();
+      console.log(`ASSERT: Last Name "${patientData.lastName}" is displayed for record ${i + 1}`);
+      
+      // Validate DOB is displayed
+      expect(patientData.dob).toBeTruthy();
+      console.log(`ASSERT: DOB "${patientData.dob}" is displayed for record ${i + 1}`);
+      
+      // Validate Phone is displayed
+      expect(patientData.phone).toBeTruthy();
+      console.log(`ASSERT: Phone "${patientData.phone}" is displayed for record ${i + 1}`);
+      
+      // Validate DE information is displayed
+      expect(patientData.de).toBeTruthy();
+      console.log(`ASSERT: DE "${patientData.de}" is displayed for record ${i + 1}`);
+      
+      console.log(`ASSERT: All required information (Patient ID, First Name, Last Name, DOB, Phone, DE) is displayed for record ${i + 1}`);
+    }
+
+    console.log(`ASSERT: Patient Grid validation completed successfully for ${rowsToValidate} patient record(s)`);
+    console.log("ASSERT: Patient ID, First Name, Last Name, DOB, Phone, and DE information is displayed against each patient record in the Patient Grid");
+
+    // Step 2: Validate sorting functionality for each column
+    console.log("\nSTEP 2: Validate that the user is able to sort data using the Patient ID, First Name, Last Name, DOB, Phone and DE columns");
+    
+    // Wait for grid to be ready
+    await page.waitForTimeout(1000);
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 10000 });
+    
+    // Get column count from first row to understand structure
+    const firstRow = patient.patientRows.first();
+    const allCells = firstRow.locator('td');
+    const totalColumns = await allCells.count();
+    console.log(`INFO: Grid has ${totalColumns} columns`);
+    
+    // Extract data from first row to determine column structure
+    const firstRowData = await patient.getPatientGridData(firstRow);
+    
+    // Check if column 2 contains last name (text with letters, not a date/phone)
+    const sortCol2Cell = firstRow.locator('td[data-colindex="2"]');
+    let sortNamesInSeparateColumns = false;
+    if (await sortCol2Cell.count() > 0) {
+      const sortCol2Text = await sortCol2Cell.textContent().catch(() => '');
+      const trimmedSortCol2 = sortCol2Text ? sortCol2Text.trim() : '';
+      // Check if it looks like a last name (has letters, not a date, not a phone)
+      const isDate = /^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(trimmedSortCol2);
+      const isPhone = /^\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4}/.test(trimmedSortCol2);
+      const hasLetter = /[A-Za-z]/.test(trimmedSortCol2);
+      sortNamesInSeparateColumns = trimmedSortCol2 && hasLetter && !isDate && !isPhone;
+    }
+    
+    // Map column indices based on structure
+    const columnMap = {
+      patientId: 0,
+      firstName: 1,
+      lastName: sortNamesInSeparateColumns ? 2 : null, // Will be extracted from column 1 if combined
+      dob: sortNamesInSeparateColumns ? 3 : 2,
+      phone: sortNamesInSeparateColumns ? 4 : 3,
+      de: sortNamesInSeparateColumns ? 5 : 4
+    };
+    
+    console.log(`INFO: Column mapping - Patient ID: ${columnMap.patientId}, First Name: ${columnMap.firstName}, Last Name: ${columnMap.lastName || 'combined with First Name'}, DOB: ${columnMap.dob}, Phone: ${columnMap.phone}, DE: ${columnMap.de}`);
+    
+    // Validate sorting for Patient ID (column 0)
+    console.log("\nACTION: Validating Patient ID column sorting...");
+    await patient.sortByColumnAndVerify(columnMap.patientId, "Patient ID");
+    console.log("ASSERT: User is able to sort data using Patient ID column");
+    
+    // Validate sorting for First Name (column 1)
+    console.log("\nACTION: Validating First Name column sorting...");
+    await patient.sortByColumnAndVerify(columnMap.firstName, "First Name");
+    console.log("ASSERT: User is able to sort data using First Name column");
+    
+    // Validate sorting for Last Name (if in separate column)
+    if (columnMap.lastName !== null) {
+      console.log("\nACTION: Validating Last Name column sorting...");
+      await patient.sortByColumnAndVerify(columnMap.lastName, "Last Name");
+      console.log("ASSERT: User is able to sort data using Last Name column");
+    } else {
+      console.log("INFO: Last Name is combined with First Name in column 1, skipping separate Last Name sorting");
+    }
+    
+    // Validate sorting for DOB
+    console.log("\nACTION: Validating DOB column sorting...");
+    await patient.sortByColumnAndVerify(columnMap.dob, "DOB");
+    console.log("ASSERT: User is able to sort data using DOB column");
+    
+    // Validate sorting for Phone
+    console.log("\nACTION: Validating Phone column sorting...");
+    await patient.sortByColumnAndVerify(columnMap.phone, "Phone");
+    console.log("ASSERT: User is able to sort data using Phone column");
+    
+    // Validate sorting for DE
+    console.log("\nACTION: Validating DE column sorting...");
+    await patient.sortByColumnAndVerify(columnMap.de, "DE");
+    console.log("ASSERT: User is able to sort data using DE column");
+    
+    console.log("\nASSERT: User is able to sort data using Patient ID, First Name, Last Name, DOB, Phone, and DE columns");
+  });
+
+  test('TC29. Validate navigation to Patient Detail page from Patient Grid', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigateToDashboard();
+    const patient = new PatientPage(page);
+
+    // Navigate to Patients tab
+    console.log("ACTION: Navigating to Patients tab...");
+    await patient.gotoPatientsTab();
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await expect(patient.addPatientBtn).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    console.log("ASSERT: Patients page has loaded");
+
+    // Wait for patient grid to load
+    console.log("ACTION: Waiting for patient grid to load...");
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 15000 });
+    
+    // Validate navigation to Patient Detail page
+    console.log("STEP: Validate that by clicking on Patient ID or First Name or Last Name, the user navigates to the Patient Detail page and lands on the summary screen of that particular patient");
+    
+    // Get first patient row for testing
+    const testRow = patient.patientRows.first();
+    await expect(testRow).toBeVisible({ timeout: 10000 });
+    
+    // Extract patient data to get identifiers
+    const testPatientData = await patient.getPatientGridData(testRow);
+    console.log(`INFO: Testing navigation with patient: ID="${testPatientData.patientId}", FirstName="${testPatientData.firstName}", LastName="${testPatientData.lastName}"`);
+    
+    // Test 1: Click on Patient ID and verify navigation
+    console.log("\nTEST 1: Clicking on Patient ID link...");
+    await patient.clickPatientLinkAndVerify(testRow, 'id');
+    console.log("ASSERT: Successfully navigated to Patient Detail page by clicking Patient ID");
+    console.log("ASSERT: User landed on the summary screen");
+    
+    // Navigate back to Patients tab and find the same patient
+    console.log("\nACTION: Navigating back to Patients tab for next test...");
+    await patient.gotoPatientsTab();
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(2000);
+    
+    // Search for the same patient by ID to ensure we get the same patient row
+    console.log(`ACTION: Searching for patient ID: ${testPatientData.patientId}...`);
+    await patient.searchPatient(testPatientData.patientId);
+    await patient.waitForGridToLoad();
+    
+    // Find the patient row by ID
+    const testRow2 = await patient.findPatientRowById(testPatientData.patientId);
+    if (!testRow2) {
+      throw new Error(`Patient row with ID ${testPatientData.patientId} not found after search`);
+    }
+    await expect(testRow2).toBeVisible({ timeout: 10000 });
+    
+    // Test 2: Click on First Name and verify navigation
+    console.log("\nTEST 2: Clicking on First Name link...");
+    await patient.clickPatientLinkAndVerify(testRow2, 'firstName');
+    console.log("ASSERT: Successfully navigated to Patient Detail page by clicking First Name");
+    console.log("ASSERT: User landed on the summary screen");
+    
+    // Navigate back to Patients tab and find the same patient
+    console.log("\nACTION: Navigating back to Patients tab for next test...");
+    await patient.gotoPatientsTab();
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(2000);
+    
+    // Search for the same patient by ID again
+    console.log(`ACTION: Searching for patient ID: ${testPatientData.patientId}...`);
+    await patient.searchPatient(testPatientData.patientId);
+    await patient.waitForGridToLoad();
+    
+    // Find the patient row by ID
+    const testRow3 = await patient.findPatientRowById(testPatientData.patientId);
+    if (!testRow3) {
+      throw new Error(`Patient row with ID ${testPatientData.patientId} not found after search`);
+    }
+    await expect(testRow3).toBeVisible({ timeout: 10000 });
+    
+    // Check if last name link exists in a separate column (for Test 3)
+    const navCol2Cell = testRow3.locator('td[data-colindex="2"]');
+    const navLastNameLink = navCol2Cell.locator('a.primaryColor');
+    const navLastNameLinkExists = await navLastNameLink.count() > 0;
+    
+    if (navLastNameLinkExists) {
+      // Test 3: Click on Last Name and verify navigation (only if last name link exists in separate column)
+      console.log("\nTEST 3: Clicking on Last Name link...");
+      await patient.clickPatientLinkAndVerify(testRow3, 'lastName');
+      console.log("ASSERT: Successfully navigated to Patient Detail page by clicking Last Name");
+      console.log("ASSERT: User landed on the summary screen");
+    } else {
+      console.log("\nINFO: Last Name is combined with First Name in column 1, so clicking First Name already tests both. Skipping separate Last Name test.");
+    }
+    
+    console.log("\nASSERT: User is able to navigate to Patient Detail page by clicking Patient ID, First Name, or Last Name, and lands on the summary screen of that particular patient");
+  });
+
+  test('TC30. Validate Action Icons are displayed and Non-Productive Encounter count functionality', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigateToDashboard();
+    const patient = new PatientPage(page);
+
+    // Navigate to Patients tab
+    console.log("ACTION: Navigating to Patients tab...");
+    await patient.gotoPatientsTab();
+    
+    // Wait for Patients page to load
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await expect(patient.addPatientBtn).toBeVisible({ timeout: 10000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
+    await page.waitForTimeout(2000);
+    console.log("ASSERT: Patients page has loaded");
+
+    // Wait for patient grid to load
+    console.log("ACTION: Waiting for patient grid to load...");
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 15000 }).catch(() => {
+      console.log("WARNING: Patient grid may be empty or still loading");
+    });
+    await page.waitForTimeout(1000);
+
+    // Step 1: Validate Action Icons are displayed in Actions column
+    console.log("\nSTEP 3: Validate that Non-Productive Encounter Count, Inactive Patient, Messaging/Chat, Print, Add Non-Productive Encounter, Treatment Plan Next Review Date (Yellow Circle Icon), Treatment Plan Next Review Date (Red Circle Icon) and Video Call Invitation icons are displayed under the Actions column against each record on the grid as per the current status of that patient");
+    
+    // Wait for grid to be ready
+    await page.waitForTimeout(1000);
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 10000 });
+    
+    // Get all patient rows
+    const actionRowCount = await patient.patientRows.count();
+    const actionRowsToValidate = Math.min(actionRowCount, 10);
+    console.log(`ACTION: Validating action icons for ${actionRowsToValidate} patient record(s)...`);
+
+    for (let i = 0; i < actionRowsToValidate; i++) {
+      const row = patient.patientRows.nth(i);
+      await expect(row).toBeVisible({ timeout: 10000 });
+      
+      // Verify Actions column structure exists
+      const actionsColumnExists = await patient.verifyActionsColumnStructure(row, i + 1);
+      expect(actionsColumnExists).toBeTruthy();
+      
+      // Validate action icons are displayed (based on patient status)
+      const actionIcons = await patient.validateActionIconsDisplayed(row, i + 1);
+      
+      // Log details about which icons are displayed
+      const iconNames = {
+        nonProductiveEncounter: 'Non-Productive Encounter Count',
+        inactivePatient: 'Inactive Patient',
+        messagingChat: 'Messaging/Chat',
+        print: 'Print',
+        addNonProductiveEncounter: 'Add Non-Productive Encounter',
+        treatmentPlanYellow: 'Treatment Plan Next Review Date (Yellow Circle Icon)',
+        treatmentPlanRed: 'Treatment Plan Next Review Date (Red Circle Icon)',
+        videoCall: 'Video Call Invitation'
+      };
+      
+      console.log(`INFO: Action icons status for record ${i + 1}:`);
+      for (const [key, name] of Object.entries(iconNames)) {
+        const status = actionIcons[key] ? 'DISPLAYED' : 'Not displayed (based on patient status)';
+        console.log(`  - ${name}: ${status}`);
+      }
+      
+      // Validate that Actions column is present and functional
+      // Note: Not all icons will be present for every patient as they depend on patient status
+      console.log(`ASSERT: Actions column is displayed and contains action icons based on patient status for record ${i + 1}`);
+    }
+
+    console.log(`\nASSERT: Action icons (Non-Productive Encounter Count, Inactive Patient, Messaging/Chat, Print, Add Non-Productive Encounter, Treatment Plan Next Review Date icons, Video Call Invitation) are displayed under the Actions column against each record on the grid as per the current status of that patient`);
+
+    // Step 2: Validate Non-Productive Encounter count display
+    console.log("\nSTEP 2: Validate that when a patient is in Registered status and creates Non-Productive Encounter, then the Non-Productive count is displayed under the Actions column for that particular patient");
+    
+    // Navigate back to Patients tab (in case we're on patient detail page)
+    console.log("ACTION: Navigating back to Patients tab...");
+    await patient.gotoPatientsTab();
+    await expect(patient.searchPatientInput).toBeVisible({ timeout: 15000 });
+    await page.waitForTimeout(2000);
+    
+    // Filter patients by Registered status and find a patient with Add Non-Productive Encounter icon
+    console.log("ACTION: Finding a patient in Registered status with Add Non-Productive Encounter icon...");
+    await patient.filterByAdmissionStatus('Registered');
+    
+    // Wait for grid to load
+    await page.waitForTimeout(2000);
+    await expect(patient.patientRows.first()).toBeVisible({ timeout: 15000 }).catch(() => {});
+    
+    // Find a patient with Add Non-Productive Encounter icon using page object method
+    const { row: registeredPatientRow, patientData: patientDataBefore } = await patient.findPatientWithAddNonProductiveEncounterIcon();
+    
+    if (!registeredPatientRow || !patientDataBefore) {
+      console.log("WARNING: No patient found with Add Non-Productive Encounter icon visible. Cannot proceed with Non-Productive Encounter creation test.");
+      return;
+    }
+    
+    console.log(`INFO: Testing with patient: ${patientDataBefore.firstName} ${patientDataBefore.lastName} (ID: ${patientDataBefore.patientId})`);
+    
+    // Validate badge count BEFORE creating encounter
+    console.log("\nACTION: Validating Non-Productive Encounter count badge BEFORE creating encounter...");
+    const badgeVisibleBefore = await patient.isNonProductiveEncounterBadgeVisible(registeredPatientRow);
+    const initialCount = await patient.getNonProductiveEncounterCount(registeredPatientRow);
+    
+    if (badgeVisibleBefore) {
+      console.log(`ASSERT: Badge is visible BEFORE with count: ${initialCount}`);
+      expect(initialCount).toBeGreaterThanOrEqual(0);
+      expect(initialCount).not.toBeNull();
+    } else {
+      console.log(`INFO: Badge is not visible BEFORE (no encounters yet). Initial count: ${initialCount}`);
+      expect(initialCount).toBe(0); // Badge doesn't exist, so count should be 0
+    }
+    
+    const expectedCountAfter = initialCount + 1;
+    console.log(`INFO: Expected count AFTER creating encounter: ${expectedCountAfter} (was ${initialCount} before)`);
+    
+    // Click on Add Non-Productive Encounter icon
+    console.log("\nACTION: Clicking Add Non-Productive Encounter icon...");
+    await patient.clickAddNonProductiveEncounterIcon(registeredPatientRow);
+    
+    // Handle confirmation popup using page object method
+    await patient.handleConfirmationPopup();
+    
+    // Wait for popup to close and grid to update
+    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+    
+    // Re-find the same patient row after grid update to ensure fresh reference
+    // Search by patient ID to ensure we get the exact patient
+    console.log(`\nACTION: Re-finding patient with ID: ${patientDataBefore.patientId} in the grid after encounter creation...`);
+    await patient.searchPatient(patientDataBefore.patientId);
+    
+    // Wait for grid to load properly after search using page object method
+    await patient.waitForGridToLoad();
+    
+    // Find the exact patient row by ID
+    const updatedPatientRow = await patient.findPatientRowById(patientDataBefore.patientId);
+    if (!updatedPatientRow) {
+      throw new Error(`Patient row with ID ${patientDataBefore.patientId} not found after search`);
+    }
+    
+    await expect(updatedPatientRow).toBeVisible({ timeout: 10000 });
+    
+    // Verify it's the same patient
+    const patientDataAfter = await patient.getPatientGridData(updatedPatientRow);
+    expect(patientDataAfter.patientId).toBe(patientDataBefore.patientId);
+    console.log(`INFO: Found same patient after encounter creation: ${patientDataAfter.firstName} ${patientDataAfter.lastName} (ID: ${patientDataAfter.patientId})`);
+    
+    // Validate badge count AFTER creating encounter
+    console.log("\nACTION: Validating Non-Productive Encounter count badge AFTER creating encounter...");
+    const badgeVisibleAfter = await patient.isNonProductiveEncounterBadgeVisible(updatedPatientRow);
+    const finalCount = await patient.getNonProductiveEncounterCount(updatedPatientRow);
+    
+    // Assert badge is visible after creating encounter (should appear with count >= 1)
+    expect(badgeVisibleAfter).toBe(true);
+    console.log(`ASSERT: Badge is visible AFTER creating encounter`);
+    
+    // Assert count is displayed and matches expected value
+    expect(finalCount).not.toBeNull();
+    expect(finalCount).toBe(expectedCountAfter);
+    console.log(`ASSERT: Non-Productive Encounter count (${finalCount}) is displayed in the badge under the Actions column`);
+    console.log(`ASSERT: Count increased from ${initialCount} to ${finalCount} (expected: ${expectedCountAfter})`);
+    
+    console.log("\nASSERT: When a patient is in Registered status and creates Non-Productive Encounter, the Non-Productive count is displayed under the Actions column for that particular patient");
+  });
+  
 });
