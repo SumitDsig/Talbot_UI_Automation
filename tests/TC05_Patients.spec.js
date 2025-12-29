@@ -462,7 +462,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.validateTreatmentPlanRedIcon();
   });
 
-  test('TC35. Validate Video Call Invitation Icon functionality', async ({ page }) => {
+  test('TC35. Validate Video Call Invitation Icon functionality and DE column value', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const patient = new PatientPage(page);
 

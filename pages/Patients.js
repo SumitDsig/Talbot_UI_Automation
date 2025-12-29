@@ -200,7 +200,7 @@ class PatientPage {
     // Treatment Plan Next Review Date (Yellow Circle Icon)
     this.getTreatmentPlanYellowIcon = (row) => {
       const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('[title*="Treatment Plan" i][title*="Yellow" i], [title*="Treatment" i][class*="yellow" i], i.fa-circle.text-warning, i.fa-circle[style*="yellow" i], .fa-circle.yellow').first();
+      return actionsCell.locator('i.fa-exclamation-circle[style*="color: yellow" i], i.fa-exclamation-circle[style*="yellow" i], [title*="Treatment Plan" i][title*="Yellow" i], [title*="Treatment" i][class*="yellow" i], i.fa-circle.text-warning, i.fa-circle[style*="yellow" i], .fa-circle.yellow').first();
     };
     
     // Treatment Plan Next Review Date (Red Circle Icon)
