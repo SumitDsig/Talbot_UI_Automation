@@ -12,41 +12,30 @@ class PatientPage {
     this.saveBtn = page.locator('button.btn-primary:has-text("Save")');
     this.cancelBtn = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) button:has-text("Cancel"), button.btn-secondary:has-text("Cancel"), button.btn-danger:has-text("Cancel")');
 
-    // Modal Title
+    // Modal helpers
+    this._modalScope = '.modal:has(.modal-title:has-text("Add New Patient"))';
     this.modalTitle = page.locator('.modal-title:has-text("Add New Patient")');
-    
-    // Modal Close Button (cross mark icon) - located in the modal header
-    // Target the <i> element with classes fa fa-times fa-lg within the Add New Patient modal
-    this.modalCloseButton = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) .modal-header i.fa.fa-times.fa-lg').first();
+    this.modalCloseButton = page.locator(`${this._modalScope} .modal-header i.fa.fa-times.fa-lg`).first();
 
-    // Form inputs
+    // Form inputs - using helper
+    this._getInputByLabel = (label) => page.locator(`label:has-text("${label}") + input`);
     this.patientId = page.locator('label:has-text("Patient Id") + input, input[id*="patientId"], input[id*="patient_id"]');
     this.billingId = page.locator('label:has-text("Billing Id") + input, input[id*="billingId"], input[id*="billing_id"]');
-    this.firstName = page.locator('label:has-text("First Name") + input');
-    this.lastName = page.locator('label:has-text("Last Name") + input');
+    this.firstName = this._getInputByLabel('First Name');
+    this.lastName = this._getInputByLabel('Last Name');
     this.dobInput = page.locator('#patient_dob_datepicker_input');
-    this.address = page.locator('label:has-text("Address") + input');
-    this.zipcode = page.locator('label:has-text("Zip Code") + input');
-    this.city = page.locator('label:has-text("City") + input');
-    this.phoneNumber = page.locator('label:has-text("Phone Number") + input');
-    this.emailAddress = page.locator('label:has-text("Email") + input');
+    this.address = this._getInputByLabel('Address');
+    this.zipcode = this._getInputByLabel('Zip Code');
+    this.city = this._getInputByLabel('City');
+    this.phoneNumber = this._getInputByLabel('Phone Number');
+    this.emailAddress = this._getInputByLabel('Email');
 
-    // Dropdowns (stable, label-based)
-    this.genderDropdown = page
-      .locator('label:has-text("Gender")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    this.stateDropdown = page
-      .locator('label:has-text("State")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    this.preferredContactDropdown = page
-      .locator('label:has-text("Preferred Contact")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    this.referralSourceDropdown = page
-      .locator('label:has-text("Referral Source")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
+    // Dropdowns (stable, label-based) - using helper
+    this._getDropdownByLabel = (label) => page.locator(`label:has-text("${label}")`).locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
+    this.genderDropdown = this._getDropdownByLabel('Gender');
+    this.stateDropdown = this._getDropdownByLabel('State');
+    this.preferredContactDropdown = this._getDropdownByLabel('Preferred Contact');
+    this.referralSourceDropdown = this._getDropdownByLabel('Referral Source');
 
     // SSN input field
     this.ssnInput = page.locator('label:has-text("SSN") + input, input[placeholder*="SSN"], input[id*="ssn"]');
@@ -59,22 +48,16 @@ class PatientPage {
     this.enableLoginCheckbox = page.locator('label:has-text("Enable Login") input[type="checkbox"], input[id*="enableLogin"]');
 
     // Phone Assessment Question (appears when Add to Cancellation List is checked)
-    // The question is in a legend tag: "Do you want to be called for a phone assessment if there is a cancellation or no show?"
-    this.phoneAssessmentQuestion = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) legend:has-text("Do you want to be called for"), .modal:has(.modal-title:has-text("Add New Patient")) fieldset legend:has-text("phone assessment")');
-    // Yes/No options for Phone Assessment - using the name attribute "enabledPhoneAssessment"
-    // Yes option has value="true", No option uses ejs-radiobutton with label="No"
-    this.phoneAssessmentYesInput = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) input[type="radio"][name="enabledPhoneAssessment"][value="true"]');
-    this.phoneAssessmentNoInput = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) ejs-radiobutton[label="No"] input[type="radio"]').first();
-    this.phoneAssessmentYesLabel = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) ejs-radiobutton[label="Yes"] label, .modal:has(.modal-title:has-text("Add New Patient")) ejs-radiobutton:has(input[type="radio"][name="enabledPhoneAssessment"][value="true"]) label').first();
-    this.phoneAssessmentNoLabel = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) ejs-radiobutton[label="No"] label').first();
+    this.phoneAssessmentQuestion = page.locator(`${this._modalScope} legend:has-text("Do you want to be called for"), ${this._modalScope} fieldset legend:has-text("phone assessment")`);
+    this.phoneAssessmentYesInput = page.locator(`${this._modalScope} input[type="radio"][name="enabledPhoneAssessment"][value="true"]`);
+    this.phoneAssessmentNoInput = page.locator(`${this._modalScope} ejs-radiobutton[label="No"] input[type="radio"]`).first();
+    this.phoneAssessmentYesLabel = page.locator(`${this._modalScope} ejs-radiobutton[label="Yes"] label, ${this._modalScope} ejs-radiobutton:has(input[type="radio"][name="enabledPhoneAssessment"][value="true"]) label`).first();
+    this.phoneAssessmentNoLabel = page.locator(`${this._modalScope} ejs-radiobutton[label="No"] label`).first();
 
     // Client Availability (appears when Add to Cancellation List is checked)
-    // Weekday checkboxes (Monday to Saturday)
-    this.getWeekdayCheckbox = (day) => page.locator('.modal:has(.modal-title:has-text("Add New Patient")) label:has-text("' + day + '") input[type="checkbox"], .modal:has(.modal-title:has-text("Add New Patient")) input[type="checkbox"][id*="' + day.toLowerCase() + '"]').first();
-    // Time controls - from and to time pickers for each day
-    // Look for time inputs near the weekday label
-    this.getTimeControls = (day) => page.locator('.modal:has(.modal-title:has-text("Add New Patient")) label:has-text("' + day + '")').locator('xpath=following::input[contains(@id, "time") or contains(@id, "Time") or contains(@placeholder, "time") or contains(@placeholder, "Time") or contains(@class, "time")]');
-    this.anyTimeInput = page.locator('.modal:has(.modal-title:has-text("Add New Patient")) input[id*="time"], .modal:has(.modal-title:has-text("Add New Patient")) input[placeholder*="time"]').first();
+    this.getWeekdayCheckbox = (day) => page.locator(`${this._modalScope} label:has-text("${day}") input[type="checkbox"], ${this._modalScope} input[type="checkbox"][id*="${day.toLowerCase()}"]`).first();
+    this.getTimeControls = (day) => page.locator(`${this._modalScope} label:has-text("${day}")`).locator('xpath=following::input[contains(@id, "time") or contains(@id, "Time") or contains(@placeholder, "time") or contains(@placeholder, "Time") or contains(@class, "time")]');
+    this.anyTimeInput = page.locator(`${this._modalScope} input[id*="time"], ${this._modalScope} input[placeholder*="time"]`).first();
     this.timeOptions = page.locator('div[id$="_popup"]:visible li[role="option"]');
     
     // Dropdown popups (generic)
@@ -131,18 +114,22 @@ class PatientPage {
     this.patientRows = page.locator('tr.e-row');
     this.firstPatientRow = page.locator('tr.e-row').first();
     
-    // Pagination locators
+    // Pagination locators - using helper
     this.paginationContainer = page.locator('.e-pagercontainer, .e-pager, .e-gridpager, [class*="pager"], [class*="pagination"]').first();
     this.itemsPerPageDropdown = page.locator('.e-pagerdropdown, .e-pager .e-dropdownbase, [class*="pagerdropdown"], select[class*="pageSize"]').first();
-    // First page button - enabled when it has e-pager-default and doesn't have e-disable
-    this.firstPageButton = page.locator('.e-first.e-pager-default:not(.e-disable), .e-first:not(.e-firstpagedisabled):not(.e-disable), [title="Go to first page"]:not(.e-disable)').first();
-    // Previous page button
-    this.previousPageButton = page.locator('.e-prev.e-pager-default:not(.e-disable), .e-prev:not(.e-prevpagedisabled):not(.e-disable), [title="Go to previous page"]:not(.e-disable)').first();
-    // Next page button - enabled when it has e-pager-default and doesn't have e-disable
-    this.nextPageButton = page.locator('.e-next.e-pager-default:not(.e-disable), .e-next:not(.e-disable), [title="Go to next page"]:not(.e-disable)').first();
-    // Last page button - enabled when it has e-pager-default and doesn't have e-disable
-    this.lastPageButton = page.locator('.e-last.e-pager-default:not(.e-disable), .e-last:not(.e-disable), [title="Go to last page"]:not(.e-disable)').first();
-    // Current page indicator
+    this._getPaginationButton = (type) => {
+      const selectors = {
+        first: '.e-first.e-pager-default:not(.e-disable), .e-first:not(.e-firstpagedisabled):not(.e-disable), [title="Go to first page"]:not(.e-disable)',
+        prev: '.e-prev.e-pager-default:not(.e-disable), .e-prev:not(.e-prevpagedisabled):not(.e-disable), [title="Go to previous page"]:not(.e-disable)',
+        next: '.e-next.e-pager-default:not(.e-disable), .e-next:not(.e-disable), [title="Go to next page"]:not(.e-disable)',
+        last: '.e-last.e-pager-default:not(.e-disable), .e-last:not(.e-disable), [title="Go to last page"]:not(.e-disable)'
+      };
+      return page.locator(selectors[type] || selectors.next).first();
+    };
+    this.firstPageButton = this._getPaginationButton('first');
+    this.previousPageButton = this._getPaginationButton('prev');
+    this.nextPageButton = this._getPaginationButton('next');
+    this.lastPageButton = this._getPaginationButton('last');
     this.currentPageIndicator = page.locator('.e-currentitem, .e-numericitem.e-currentitem.e-active, a.e-numericitem.e-currentitem').first();
     
     // First patient row ID link
@@ -163,57 +150,19 @@ class PatientPage {
       return allCells.last();
     };
     
-    // Action icons - using title/aria-label attributes and icon classes
-    // Non-Productive Encounter Count icon
-    this.getNonProductiveEncounterIcon = (row) => {
+    // Action icons - consolidated helper
+    this._getActionIcon = (row, selectors) => {
       const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('[title*="Non-Productive" i], [title*="Encounter" i], [aria-label*="Non-Productive" i], [aria-label*="Encounter" i], i.fa-calendar-times, i.fa-calendar-times-o').first();
+      return actionsCell.locator(selectors).first();
     };
-    
-    // Inactive Patient icon (SVG with ban-solid path)
-    this.getInactivePatientIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      // Target SVG element that contains the ban-solid path, or fallback to title/aria-label
-      return actionsCell.locator('svg:has(path#ban-solid), svg[fill="#707070"]:has(path#ban-solid), [title*="Inactive" i], [aria-label*="Inactive" i]').first();
-    };
-    
-    // Messaging/Chat icon (exact structure: <i class="fa fa-envelope ml-10 fs-16 ng-star-inserted"></i>)
-    this.getMessagingChatIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('i.fa-envelope.ml-10, i.fa-envelope[class*="ml-10"], [title*="Message" i], [title*="Chat" i], [title*="Messaging" i], [aria-label*="Message" i], [aria-label*="Chat" i], i.fa-comments, i.fa-comment').first();
-    };
-    
-    // Print icon
-    this.getPrintIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('[title*="Print" i], [aria-label*="Print" i], i.fa-print, i.fa-file-pdf').first();
-    };
-    
-    // Add Non-Productive Encounter icon
-    // Exact structure: <i title="Add Non-Productive Encounter" class="fa fa-plus-circle ml-10 fs-16 ng-star-inserted"></i>
-    this.getAddNonProductiveEncounterIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      // Match exact structure: i element with title="Add Non-Productive Encounter"
-      return actionsCell.locator('i[title="Add Non-Productive Encounter"], i.fa-plus-circle[title="Add Non-Productive Encounter"]').first();
-    };
-    
-    // Treatment Plan Next Review Date (Yellow Circle Icon)
-    this.getTreatmentPlanYellowIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('i.fa-exclamation-circle[style*="color: yellow" i], i.fa-exclamation-circle[style*="yellow" i], [title*="Treatment Plan" i][title*="Yellow" i], [title*="Treatment" i][class*="yellow" i], i.fa-circle.text-warning, i.fa-circle[style*="yellow" i], .fa-circle.yellow').first();
-    };
-    
-    // Treatment Plan Next Review Date (Red Circle Icon)
-    this.getTreatmentPlanRedIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('i.fa-exclamation-circle[style*="color: red" i], i.fa-exclamation-circle[style*="red" i], [title*="Treatment Plan" i][title*="Red" i], [title*="Treatment" i][class*="red" i], i.fa-circle.text-danger, i.fa-circle[style*="red" i], .fa-circle.red').first();
-    };
-    
-    // Video Call Invitation icon
-    this.getVideoCallIcon = (row) => {
-      const actionsCell = this.getActionsCell(row);
-      return actionsCell.locator('[title*="Video" i], [title*="Video Call" i], [aria-label*="Video" i], i.fa-video, i.fa-video-camera').first();
-    };
+    this.getNonProductiveEncounterIcon = (row) => this._getActionIcon(row, '[title*="Non-Productive" i], [title*="Encounter" i], [aria-label*="Non-Productive" i], [aria-label*="Encounter" i], i.fa-calendar-times, i.fa-calendar-times-o');
+    this.getInactivePatientIcon = (row) => this._getActionIcon(row, 'svg:has(path#ban-solid), svg[fill="#707070"]:has(path#ban-solid), [title*="Inactive" i], [aria-label*="Inactive" i]');
+    this.getMessagingChatIcon = (row) => this._getActionIcon(row, 'i.fa-envelope.ml-10, i.fa-envelope[class*="ml-10"], [title*="Message" i], [title*="Chat" i], [title*="Messaging" i], [aria-label*="Message" i], [aria-label*="Chat" i], i.fa-comments, i.fa-comment');
+    this.getPrintIcon = (row) => this._getActionIcon(row, '[title*="Print" i], [aria-label*="Print" i], i.fa-print, i.fa-file-pdf');
+    this.getAddNonProductiveEncounterIcon = (row) => this._getActionIcon(row, 'i[title="Add Non-Productive Encounter"], i.fa-plus-circle[title="Add Non-Productive Encounter"]');
+    this.getTreatmentPlanYellowIcon = (row) => this._getActionIcon(row, 'i.fa-exclamation-circle[style*="color: yellow" i], i.fa-exclamation-circle[style*="yellow" i], [title*="Treatment Plan" i][title*="Yellow" i], [title*="Treatment" i][class*="yellow" i], i.fa-circle.text-warning, i.fa-circle[style*="yellow" i], .fa-circle.yellow');
+    this.getTreatmentPlanRedIcon = (row) => this._getActionIcon(row, 'i.fa-exclamation-circle[style*="color: red" i], i.fa-exclamation-circle[style*="red" i], [title*="Treatment Plan" i][title*="Red" i], [title*="Treatment" i][class*="red" i], i.fa-circle.text-danger, i.fa-circle[style*="red" i], .fa-circle.red');
+    this.getVideoCallIcon = (row) => this._getActionIcon(row, '[title*="Video" i], [title*="Video Call" i], [aria-label*="Video" i], i.fa-video, i.fa-video-camera');
     
     // Generic method to get all action icons/buttons in a row
     this.getActionIcons = (row) => {
@@ -290,20 +239,10 @@ class PatientPage {
     // Patient header name link
     this.patientHeaderName = page.locator('.card-header .card-title-text');
 
-    // Religion dropdown wrapper
-    this.religionDropdown = page
-      .locator('label:has-text("Religion")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // Ethnicity wrapper
-    this.ethnicityDropdown = page
-      .locator('label:has-text("Ethnicity")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // Default Provider dropdown wrapper
-    this.defaultProviderDropdown = page
-      .locator('label:has-text("Default Provider")')
-      .locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
+    // Religion, Ethnicity, Default Provider dropdowns
+    this.religionDropdown = this._getDropdownByLabel('Religion');
+    this.ethnicityDropdown = this._getDropdownByLabel('Ethnicity');
+    this.defaultProviderDropdown = this._getDropdownByLabel('Default Provider');
 
     // Save Patient Information button
     this.savePatientInformationBtn = page.locator('button.btn-primary:has-text("Save Patient Information")');
@@ -324,32 +263,16 @@ class PatientPage {
     // Policy Number input
     this.policyNumberInput = page.locator('#policy_number');
 
-    // Level dropdown
-    this.levelDropdown = page.locator('label:has-text("Level *")').locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // Pt Relation to Policy Holder dropdown
-    this.ptRelationDropdown = page.locator('label:has-text("Pt Relation to Policy Holder *")').locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // Policy Holder First Name
+    // Insurance Policy dropdowns and inputs
+    this.levelDropdown = this._getDropdownByLabel('Level *');
+    this.ptRelationDropdown = this._getDropdownByLabel('Pt Relation to Policy Holder *');
+    this.sexDropdown = this._getDropdownByLabel('Sex *');
+    this.payorIdDropdown = this._getDropdownByLabel('Payor Id');
+    this.companyNameDropdown = this._getDropdownByLabel('Company Name');
     this.policyHolderFirstName = page.locator('#firstName');
-
-    // Policy Holder Last Name
     this.policyHolderLastName = page.locator('#lastName');
-
-    // Sex dropdown
-    this.sexDropdown = page.locator('label:has-text("Sex *")').locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // DOB datepicker
     this.policyHolderDobInput = page.locator('#dob_datepicker_input');
-
-    // Save Insurance Policy button
     this.saveInsurancePolicyBtn = page.locator('patient-add-policy button.btn-primary:has-text("Save")');
-
-    // Payor Id dropdown
-    this.payorIdDropdown = page.locator('label:has-text("Payor Id")').locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
-
-    // Company Name dropdown
-    this.companyNameDropdown = page.locator('label:has-text("Company Name")').locator('xpath=../..//div[contains(@class,"e-control-wrapper")]');
 
     // Confirmation Dialog
     this.confirmationDialog = page.locator('patient-conformation-dialog');
@@ -388,12 +311,77 @@ class PatientPage {
     this.workMenuOptions = page.locator('div:has-text("Work Menu")').locator('xpath=ancestor::div[contains(@class, "row")]//div[contains(@class, "mat-menu") and contains(@class, "cursor")]');
   }
 
+  // ========== Helper Methods ==========
+  
+  // Generic dropdown selection helper with retry logic
+  async selectDropdownOption(dropdown, optionText, dropdownName = '') {
+    await dropdown.click({ force: true });
+    await this.page.waitForTimeout(500);
+    const popup = this.dropdownPopup;
+    await popup.waitFor({ state: 'visible', timeout: 5000 });
+    await popup.getByRole('option', { name: optionText, exact: true }).click();
+    await this.page.waitForTimeout(300);
+    if (dropdownName) console.log(`ASSERT: ${dropdownName} "${optionText}" selected successfully`);
+  }
+
+  // Unified dropdown selection with fallback strategies
+  async _selectDropdownWithFallback(dropdown, optionText, dropdownName = '') {
+    const dropdownInput = dropdown.locator('input.e-input, input[role="combobox"]').first();
+    await dropdownInput.click({ force: true });
+    await this.page.waitForTimeout(1500);
+    
+    let popup = this.dropdownPopup;
+    let popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
+    
+    if (!popupVisible) {
+      const dropdownId = await dropdown.getAttribute('aria-controls').catch(() => null);
+      if (dropdownId) popup = this.page.locator(`div#${dropdownId}:visible`);
+      popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
+    }
+    
+    if (!popupVisible) {
+      const hiddenSelect = dropdown.locator('select.e-ddl-hidden');
+      if (await hiddenSelect.count() > 0) {
+        await hiddenSelect.selectOption({ label: optionText });
+        await this.page.waitForTimeout(1000);
+        return;
+      }
+    }
+    
+    await popup.waitFor({ state: 'visible', timeout: 5000 });
+    await popup.getByRole('option', { name: optionText, exact: true }).click();
+    await this.page.waitForTimeout(1000);
+    if (dropdownName) console.log(`ASSERT: ${dropdownName} "${optionText}" selected successfully`);
+  }
+
+  // Generic field validation and fill helper
+  async validateAndFillField(fieldLocator, value, fieldName) {
+    await expect(fieldLocator).toBeVisible();
+    await expect(fieldLocator).toBeEnabled();
+    console.log(`ASSERT: ${fieldName} is visible and enabled`);
+    await fieldLocator.fill(value);
+    expect(await fieldLocator.inputValue()).toBe(value);
+    console.log(`ASSERT: ${fieldName} "${value}" entered successfully`);
+  }
+
+  // Generic checkbox validation helper
+  async validateCheckbox(checkboxLocator, checkboxName) {
+    await expect(checkboxLocator).toBeVisible();
+    await expect(checkboxLocator).toBeEnabled();
+    console.log(`ASSERT: ${checkboxName} checkbox is visible and enabled`);
+  }
+
+  // Generic visibility validation helper
+  async _validateVisible(locator, elementName) {
+    await expect(locator).toBeVisible({ timeout: 10000 });
+    console.log(`ASSERT: ${elementName} is visible`);
+  }
+
   async gotoPatientsTab() {
     console.log('ACTION: Clicking Patients tab...');
     await this.patientsTab.click();
-    // Wait for navigation to complete
     await this.page.waitForLoadState('domcontentloaded', { timeout: 30000 });
-    await this.page.waitForTimeout(1000); // Allow page to start rendering
+    await this.page.waitForTimeout(1000);
   }
 
   // Navigate directly to Patients tab using URL
@@ -425,34 +413,33 @@ class PatientPage {
 
   async validateFormFields() {
     console.log("VALIDATION: Starting form field validation...");
-
-    await expect(this.firstName).toBeVisible();
-    await expect(this.lastName).toBeVisible();
-    await expect(this.dobInput).toBeVisible();
-    await expect(this.genderDropdown).toBeVisible();
-    await expect(this.address).toBeVisible();
-    await expect(this.zipcode).toBeVisible();
-    await expect(this.city).toBeVisible();
-    await expect(this.stateDropdown).toBeVisible();
-    await expect(this.preferredContactDropdown).toBeVisible();
-    await expect(this.referralSourceDropdown).toBeVisible();
-    await expect(this.phoneNumber).toBeVisible();
-
-    // Validate dropdown options
+    const fields = [
+      { locator: this.firstName, name: 'First Name' },
+      { locator: this.lastName, name: 'Last Name' },
+      { locator: this.dobInput, name: 'DOB' },
+      { locator: this.genderDropdown, name: 'Gender' },
+      { locator: this.address, name: 'Address' },
+      { locator: this.zipcode, name: 'Zip Code' },
+      { locator: this.city, name: 'City' },
+      { locator: this.stateDropdown, name: 'State' },
+      { locator: this.preferredContactDropdown, name: 'Preferred Contact' },
+      { locator: this.referralSourceDropdown, name: 'Referral Source' },
+      { locator: this.phoneNumber, name: 'Phone Number' }
+    ];
+    for (const field of fields) {
+      await expect(field.locator).toBeVisible();
+    }
+    
     console.log("VALIDATION: Validating dropdown options...");
-    
-    // Validate Gender dropdown options
-    await this.validateDropdownOptions(this.genderDropdown, "Gender");
-    
-    // Validate State dropdown options
-    await this.validateDropdownOptions(this.stateDropdown, "State");
-    
-    // Validate Preferred Contact dropdown options
-    await this.validateDropdownOptions(this.preferredContactDropdown, "Preferred Contact");
-    
-    // Validate Referral Source dropdown options
-    await this.validateDropdownOptions(this.referralSourceDropdown, "Referral Source");
-
+    const dropdowns = [
+      { dropdown: this.genderDropdown, name: "Gender" },
+      { dropdown: this.stateDropdown, name: "State" },
+      { dropdown: this.preferredContactDropdown, name: "Preferred Contact" },
+      { dropdown: this.referralSourceDropdown, name: "Referral Source" }
+    ];
+    for (const { dropdown, name } of dropdowns) {
+      await this.validateDropdownOptions(dropdown, name);
+    }
     console.log("VALIDATION COMPLETE.");
   }
 
@@ -1048,134 +1035,8 @@ class PatientPage {
 
   async selectAdmissionStatus(status) {
     console.log(`ACTION: Selecting Admission Status: ${status}`);
-    
-    // Ensure dropdown is ready
     await expect(this.admissionStatusDropdown).toBeVisible();
-    await this.page.waitForTimeout(500);
-    
-    // Try clicking the input field first (most reliable for Syncfusion dropdowns)
-    const dropdownInput = this.admissionStatusDropdown.locator('input.e-input');
-    await expect(dropdownInput).toBeVisible({ timeout: 5000 });
-    console.log('ACTION: Clicking dropdown input field to open dropdown...');
-    await dropdownInput.click({ force: true });
-    await this.page.waitForTimeout(1500);
-    
-    // Wait for popup to appear - try multiple selectors
-    let popup = this.dropdownPopup;
-    let popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-    
-    // If generic popup selector doesn't work, try finding popup by aria-controls
-    if (!popupVisible) {
-      const dropdownId = await this.admissionStatusDropdown.getAttribute('aria-controls').catch(() => null);
-      if (dropdownId) {
-        console.log(`INFO: Trying popup with ID: ${dropdownId}`);
-        popup = this.page.locator(`div#${dropdownId}:visible`);
-        popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-      }
-    }
-    
-    // If still not visible, try clicking the icon
-    if (!popupVisible) {
-      console.log('INFO: Popup not visible, trying to click dropdown icon...');
-      const dropdownIcon = this.admissionStatusDropdown.locator('span.e-ddl-icon, span.e-input-group-icon');
-      await dropdownIcon.click({ force: true });
-      await this.page.waitForTimeout(1500);
-      popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-    }
-    
-    // Try one more time with a different approach - click input and wait longer
-    if (!popupVisible) {
-      console.log('INFO: Retrying with input click and longer wait...');
-      await dropdownInput.click({ force: true });
-      await this.page.waitForTimeout(2000);
-      popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-    }
-    
-    // Try using the select element directly (hidden select in Syncfusion dropdowns)
-    if (!popupVisible) {
-      console.log('INFO: Trying to use select element directly...');
-      const hiddenSelect = this.admissionStatusDropdown.locator('select.e-ddl-hidden');
-      const selectExists = await hiddenSelect.count() > 0;
-      if (selectExists) {
-        try {
-          // Try to select by option text
-          await hiddenSelect.selectOption({ label: status });
-          await this.page.waitForTimeout(1000);
-          console.log(`INFO: Successfully selected ${status} using select element`);
-          return; // Exit early if successful
-        } catch (selectError) {
-          console.log('INFO: Direct select failed, continuing with popup approach...');
-        }
-      }
-    }
-    
-    // Final wait for popup with reduced timeout and better error handling
-    try {
-      await popup.waitFor({ state: 'visible', timeout: 5000 });
-    } catch (error) {
-      // If popup still doesn't appear, try using keyboard to open dropdown
-      // First ensure page is still alive and element is visible
-      console.log('INFO: Popup not appearing, trying keyboard navigation...');
-      
-      // Wait for page to be stable before attempting focus
-      await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-      await this.page.waitForTimeout(500);
-      
-      // Check if dropdown input is still visible and page is alive
-      const isVisible = await dropdownInput.isVisible({ timeout: 3000 }).catch(() => false);
-      if (!isVisible) {
-        throw new Error('Dropdown input is not visible - page may have changed or closed');
-      }
-      
-      try {
-        await dropdownInput.focus();
-        await this.page.keyboard.press('ArrowDown');
-        await this.page.waitForTimeout(1000);
-      } catch (focusError) {
-        console.log(`WARNING: Could not focus dropdown input: ${focusError.message}`);
-        // Re-throw the error with more context
-        throw new Error(`Failed to interact with dropdown - page may have been closed: ${focusError.message}`);
-      }
-      
-      // Try to find popup again
-      popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-      
-      // If still not visible, try Space or Enter key
-      if (!popupVisible) {
-        console.log('INFO: Trying Space key to open dropdown...');
-        // Check if page is still alive and element is visible
-        const isStillVisible = await dropdownInput.isVisible({ timeout: 3000 }).catch(() => false);
-        if (isStillVisible) {
-          await dropdownInput.focus();
-          await this.page.keyboard.press('Space');
-          await this.page.waitForTimeout(1000);
-        } else {
-          throw new Error('Dropdown input is no longer visible - page may have changed or closed');
-        }
-        popupVisible = await popup.isVisible({ timeout: 3000 }).catch(() => false);
-      }
-      
-      if (!popupVisible) {
-        // Last resort: log warning but don't fail - the dropdown might be working but popup detection is failing
-        console.log(`WARNING: Could not open dropdown popup, but attempting to set value directly...`);
-        // Try setting value directly in the input field
-        try {
-          await dropdownInput.fill(status);
-          await this.page.waitForTimeout(500);
-          await this.page.keyboard.press('Enter');
-          await this.page.waitForTimeout(1000);
-          console.log(`INFO: Attempted to set status to ${status} directly`);
-          return; // Exit - we tried our best
-        } catch (directError) {
-          throw new Error(`Failed to open Admission Status dropdown popup after multiple attempts. Cannot select status: ${status}. Error: ${directError.message}`);
-        }
-      }
-    }
-    
-    // Select the admission status option
-    console.log(`ACTION: Selecting admission status option: ${status}`);
-    await popup.getByRole('option', { name: status, exact: true }).click();
-    await this.page.waitForTimeout(1000); // Wait for selection to apply
+    await this._selectDropdownWithFallback(this.admissionStatusDropdown, status, 'Admission Status');
   }
 
   async waitForReligionFieldReady() {
@@ -2815,28 +2676,20 @@ class PatientPage {
   async validatePatientTabControlsVisibility() {
     console.log("STEP 1: Validate on the Patient Tab, above the Patient Listing grid the Admission Status dropdown, All Clients/My Clients Toggle bar, Search Patient control, Add Patient button and Card View icon are visible on top.");
     
-    // Validate Admission Status dropdown is visible
-    await expect(this.admissionStatusDropdown).toBeVisible({ timeout: 10000 });
-    console.log("ASSERT: Admission Status dropdown is visible above Patient Listing grid");
-
-    // Validate All Clients/My Clients Toggle bar is visible
-    await expect(this.clientsToggleBar).toBeVisible({ timeout: 10000 });
-    await expect(this.clientsToggleLabel).toBeVisible({ timeout: 10000 });
-    console.log("ASSERT: All Clients/My Clients Toggle bar is visible above Patient Listing grid");
-
-    // Validate Search Patient control is visible
-    await expect(this.searchPatientInput).toBeVisible({ timeout: 10000 });
-    console.log("ASSERT: Search Patient control is visible above Patient Listing grid");
-
-    // Validate Add Patient button is visible
-    await expect(this.addPatientBtn).toBeVisible({ timeout: 10000 });
-    console.log("ASSERT: Add Patient button is visible above Patient Listing grid");
-
-    // Validate Card View icon is visible
-    await expect(this.cardViewIcon).toBeVisible({ timeout: 10000 });
-    console.log("ASSERT: Card View icon is visible above Patient Listing grid");
-
-    console.log("ASSERT: All required controls (Admission Status dropdown, All Clients/My Clients Toggle, Search Patient, Add Patient button, Card View icon) are visible above Patient Listing grid");
+    const controls = [
+      { locator: this.admissionStatusDropdown, name: 'Admission Status dropdown' },
+      { locator: this.clientsToggleBar, name: 'All Clients/My Clients Toggle bar' },
+      { locator: this.clientsToggleLabel, name: 'Toggle label' },
+      { locator: this.searchPatientInput, name: 'Search Patient control' },
+      { locator: this.addPatientBtn, name: 'Add Patient button' },
+      { locator: this.cardViewIcon, name: 'Card View icon' }
+    ];
+    
+    for (const control of controls) {
+      await expect(control.locator).toBeVisible({ timeout: 10000 });
+      console.log(`ASSERT: ${control.name} is visible above Patient Listing grid`);
+    }
+    console.log("ASSERT: All required controls are visible above Patient Listing grid");
   }
 
   // Step 2: Validate Admission Status dropdown selection
@@ -3106,29 +2959,15 @@ class PatientPage {
   // Validate and fill First Name
   async validateAndFillFirstName(firstName) {
     console.log("STEP 6: Verify that on the Add New Patient popup, the First Name text field is visible and enabled");
-    await expect(this.firstName).toBeVisible();
-    await expect(this.firstName).toBeEnabled();
-    console.log("ASSERT: First Name text field is visible and enabled");
-
     console.log("STEP 7: Validate user is able to add the Patient's First Name in the First Name text field");
-    await this.firstName.fill(firstName);
-    const enteredFirstName = await this.firstName.inputValue();
-    expect(enteredFirstName).toBe(firstName);
-    console.log(`ASSERT: First Name "${firstName}" entered successfully`);
+    await this.validateAndFillField(this.firstName, firstName, "First Name");
   }
 
   // Validate and fill Last Name
   async validateAndFillLastName(lastName) {
     console.log("STEP 8: Verify that on the Add New Patient popup, the Last Name text field is visible and enabled");
-    await expect(this.lastName).toBeVisible();
-    await expect(this.lastName).toBeEnabled();
-    console.log("ASSERT: Last Name text field is visible and enabled");
-
     console.log("STEP 9: Validate user is able to add the Patient's Last Name in the Last Name text field");
-    await this.lastName.fill(lastName);
-    const enteredLastName = await this.lastName.inputValue();
-    expect(enteredLastName).toBe(lastName);
-    console.log(`ASSERT: Last Name "${lastName}" entered successfully`);
+    await this.validateAndFillField(this.lastName, lastName, "Last Name");
   }
 
   // Validate and fill DOB
@@ -3152,14 +2991,8 @@ class PatientPage {
     await expect(this.genderDropdown).toBeVisible();
     await expect(this.genderDropdown.locator('input[role="combobox"]')).toBeEnabled();
     console.log("ASSERT: Gender dropdown is visible and enabled");
-
     console.log("STEP 13: Validate user is able to select the Patient's Gender using the dropdown control");
-    await this.genderDropdown.click({ force: true });
-    await this.page.waitForTimeout(500);
-    await this.dropdownPopup.waitFor({ state: 'visible', timeout: 10000 });
-    await this.dropdownPopup.getByRole('option', { name: gender, exact: true }).click();
-    await this.page.waitForTimeout(300);
-    console.log(`ASSERT: Gender "${gender}" selected successfully`);
+    await this.selectDropdownOption(this.genderDropdown, gender, "Gender");
   }
 
   // Validate and fill SSN
@@ -3184,15 +3017,8 @@ class PatientPage {
   // Validate and fill Address
   async validateAndFillAddress(address) {
     console.log("STEP 17: Verify that on the Add New Patient popup, the Address text field is visible and enabled");
-    await expect(this.address).toBeVisible();
-    await expect(this.address).toBeEnabled();
-    console.log("ASSERT: Address text field is visible and enabled");
-
     console.log("STEP 18: Validate user is able to add the Patient's Address in the Address text field");
-    await this.address.fill(address);
-    const enteredAddress = await this.address.inputValue();
-    expect(enteredAddress).toBe(address);
-    console.log(`ASSERT: Address "${address}" entered successfully`);
+    await this.validateAndFillField(this.address, address, "Address");
   }
 
   // Validate Zip, City, and State controls and fill Zip Code
@@ -3258,15 +3084,8 @@ class PatientPage {
   // Validate and fill Email
   async validateAndFillEmail(email) {
     console.log("STEP 25: Verify that on the Add New Patient popup, the Email text field is visible and enabled");
-    await expect(this.emailAddress).toBeVisible();
-    await expect(this.emailAddress).toBeEnabled();
-    console.log("ASSERT: Email text field is visible and enabled");
-
     console.log("STEP 26: Validate user is able to add the Patient's related email in the Email text field");
-    await this.emailAddress.fill(email);
-    const enteredEmail = await this.emailAddress.inputValue();
-    expect(enteredEmail).toBe(email);
-    console.log(`ASSERT: Email "${email}" entered successfully`);
+    await this.validateAndFillField(this.emailAddress, email, "Email");
   }
 
   // Validate and select Preferred Contact
@@ -3290,15 +3109,8 @@ class PatientPage {
   // Validate and fill Phone Number
   async validateAndFillPhoneNumber(phone) {
     console.log("STEP 29: Verify that on the Add New Patient popup, the Phone Number text field is visible and enabled");
-    await expect(this.phoneNumber).toBeVisible();
-    await expect(this.phoneNumber).toBeEnabled();
-    console.log("ASSERT: Phone Number text field is visible and enabled");
-
     console.log("STEP 30: Validate user is able to add the Patient's Phone Number in the Phone Number text field");
-    await this.phoneNumber.fill(phone);
-    const enteredPhone = await this.phoneNumber.inputValue();
-    expect(enteredPhone).toBe(phone);
-    console.log(`ASSERT: Phone Number "${phone}" entered successfully`);
+    await this.validateAndFillField(this.phoneNumber, phone, "Phone Number");
   }
 
   // Validate and select Referral Source
@@ -3322,22 +3134,10 @@ class PatientPage {
   // Validate checkboxes visibility and enabled state
   async validateCheckboxesVisibilityAndEnabled() {
     console.log("STEP 33: Validate on the Add New Patient popup, the Is Test Patient, Add to Cancellation List?, Is Walk-In Emergency Care Client? and Enable Login checkboxes are visible and enabled");
-    
-    await expect(this.isTestPatientCheckbox).toBeVisible();
-    await expect(this.isTestPatientCheckbox).toBeEnabled();
-    console.log("ASSERT: Is Test Patient checkbox is visible and enabled");
-    
-    await expect(this.addToCancellationListCheckbox).toBeVisible();
-    await expect(this.addToCancellationListCheckbox).toBeEnabled();
-    console.log("ASSERT: Add to Cancellation List checkbox is visible and enabled");
-    
-    await expect(this.isWalkInEmergencyCareClientCheckbox).toBeVisible();
-    await expect(this.isWalkInEmergencyCareClientCheckbox).toBeEnabled();
-    console.log("ASSERT: Is Walk-In Emergency Care Client checkbox is visible and enabled");
-    
-    await expect(this.enableLoginCheckbox).toBeVisible();
-    await expect(this.enableLoginCheckbox).toBeEnabled();
-    console.log("ASSERT: Enable Login checkbox is visible and enabled");
+    await this.validateCheckbox(this.isTestPatientCheckbox, "Is Test Patient");
+    await this.validateCheckbox(this.addToCancellationListCheckbox, "Add to Cancellation List");
+    await this.validateCheckbox(this.isWalkInEmergencyCareClientCheckbox, "Is Walk-In Emergency Care Client");
+    await this.validateCheckbox(this.enableLoginCheckbox, "Enable Login");
   }
 
   // Validate Add to Cancellation List checkbox functionality (phone assessment question)
@@ -4829,56 +4629,42 @@ class PatientPage {
     await this.waitForGridToLoad();
   }
 
-  // Check if pagination button is enabled
+  // Check if pagination button is enabled - simplified
   async isPaginationButtonEnabled(buttonLocator) {
     try {
-      // Try to find the button element
-      const buttonCount = await buttonLocator.count();
-      if (buttonCount === 0) {
-        return false;
-      }
-      
+      if (await buttonLocator.count() === 0) return false;
       const button = buttonLocator.first();
-      const isVisible = await button.isVisible({ timeout: 2000 }).catch(() => false);
-      if (!isVisible) {
-        return false;
-      }
-      
-      // Check if button has disable classes or is enabled (has e-pager-default or e-nextpage/e-lastpage)
-      const buttonState = await button.evaluate((el) => {
-        const hasDisable = el.classList.contains('e-disable') || 
-                          el.classList.contains('e-disabled') ||
-                          el.classList.contains('e-firstpagedisabled') ||
-                          el.classList.contains('e-prevpagedisabled') ||
-                          el.classList.contains('e-nextpagedisabled') ||
-                          el.classList.contains('e-lastpagedisabled');
-        // Button is enabled if it has e-pager-default OR has nextpage/lastpage classes (without disable)
-        const hasEnabled = el.classList.contains('e-pager-default') || 
-                          el.classList.contains('e-nextpage') ||
-                          el.classList.contains('e-lastpage');
-        return { hasDisable, hasEnabled };
-      }).catch(() => ({ hasDisable: true, hasEnabled: false }));
-      
-      // Button is enabled if it has enabled indicator and doesn't have disable classes
-      return buttonState.hasEnabled && !buttonState.hasDisable;
+      if (!(await button.isVisible({ timeout: 2000 }).catch(() => false))) return false;
+      const state = await button.evaluate((el) => ({
+        hasDisable: el.classList.contains('e-disable') || el.classList.contains('e-disabled') || 
+                    ['e-firstpagedisabled', 'e-prevpagedisabled', 'e-nextpagedisabled', 'e-lastpagedisabled']
+                      .some(cls => el.classList.contains(cls)),
+        hasEnabled: el.classList.contains('e-pager-default') || el.classList.contains('e-nextpage') || el.classList.contains('e-lastpage')
+      })).catch(() => ({ hasDisable: true, hasEnabled: false }));
+      return state.hasEnabled && !state.hasDisable;
     } catch {
       return false;
     }
   }
 
-  // Validate pagination navigation
+  // Helper to find enabled pagination button from multiple locators
+  async _findEnabledPaginationButton(locators) {
+    for (const locator of locators) {
+      if (await this.isPaginationButtonEnabled(locator)) return locator;
+    }
+    return null;
+  }
+
+  // Validate pagination navigation - simplified
   async validatePaginationNavigation() {
     console.log("\nSTEP 3: Validate when Clicking on the Go To First Page or Go To Next Page or Go To Last Page icons, the user is navigated to that specific page based on which icon is being clicked.");
     
-    // Wait for pagination to be visible
     await expect(this.paginationContainer).toBeVisible({ timeout: 10000 });
-    await this.page.waitForTimeout(1000); // Allow pagination to fully render
+    await this.page.waitForTimeout(1000);
     
-    // Get initial page number
     const initialPage = await this.getCurrentPageNumber();
     console.log(`INFO: Initial page number: ${initialPage}`);
     
-    // Try multiple locators for Next button to ensure we find it
     const nextButtonLocators = [
       this.page.locator('.e-next.e-pager-default:not(.e-disable)'),
       this.page.locator('.e-next.e-nextpage:not(.e-disable)'),
@@ -4886,134 +4672,96 @@ class PatientPage {
       this.page.locator('[title="Go to next page"]:not(.e-disable)')
     ];
     
-    let nextButtonEnabled = false;
-    for (const locator of nextButtonLocators) {
-      nextButtonEnabled = await this.isPaginationButtonEnabled(locator);
-      if (nextButtonEnabled) break;
-    }
+    const nextButton = await this._findEnabledPaginationButton(nextButtonLocators);
+    const nextButtonEnabled = nextButton !== null;
     
-    // Test Next Page navigation (if we're on page 1 and next button is enabled)
+    // Test Next Page navigation
     if (nextButtonEnabled && initialPage === 1) {
       console.log("\nACTION: Testing Next Page navigation...");
       await this.clickNextPageButton();
-      await this.page.waitForTimeout(1000); // Wait for page to update
+      await this.page.waitForTimeout(1000);
       const nextPageNumber = await this.getCurrentPageNumber();
       console.log(`INFO: Page number after clicking Next: ${nextPageNumber}`);
       expect(nextPageNumber).toBeGreaterThan(initialPage);
       console.log("ASSERT: Successfully navigated to next page");
       
-      // Test Previous Page navigation (should be enabled now that we're on page 2+)
+      // Test Previous Page navigation
       const prevButtonLocators = [
         this.page.locator('.e-prev.e-pager-default:not(.e-disable)'),
         this.page.locator('.e-prev:not(.e-disable):not(.e-prevpagedisabled)'),
         this.page.locator('[title="Go to previous page"]:not(.e-disable)')
       ];
+      const prevButton = await this._findEnabledPaginationButton(prevButtonLocators);
       
-      let prevButtonEnabled = false;
-      for (const locator of prevButtonLocators) {
-        prevButtonEnabled = await this.isPaginationButtonEnabled(locator);
-        if (prevButtonEnabled) break;
-      }
-      
-      if (prevButtonEnabled) {
+      if (prevButton) {
         console.log("\nACTION: Testing Previous Page navigation...");
         await this.clickPreviousPageButton();
         await this.page.waitForTimeout(1000);
-        const prevPageNumber = await this.getCurrentPageNumber();
-        console.log(`INFO: Page number after clicking Previous: ${prevPageNumber}`);
-        expect(prevPageNumber).toBe(initialPage);
+        expect(await this.getCurrentPageNumber()).toBe(initialPage);
         console.log("ASSERT: Successfully navigated to previous page (back to page 1)");
       }
       
       // Navigate to page 2 again for First Page test
-      for (const locator of nextButtonLocators) {
-        const enabled = await this.isPaginationButtonEnabled(locator);
-        if (enabled) {
-          await this.clickNextPageButton();
-          break;
-        }
+      if (nextButton) {
+        await this.clickNextPageButton();
+        await this.page.waitForTimeout(1000);
       }
-      await this.page.waitForTimeout(1000);
       
-      // Test First Page navigation (should be enabled now that we're on page 2+)
+      // Test First Page navigation
       const firstButtonLocators = [
         this.page.locator('.e-first.e-pager-default:not(.e-disable)'),
         this.page.locator('.e-first:not(.e-disable):not(.e-firstpagedisabled)'),
         this.page.locator('[title="Go to first page"]:not(.e-disable)')
       ];
+      const firstButton = await this._findEnabledPaginationButton(firstButtonLocators);
       
-      let firstButtonEnabled = false;
-      for (const locator of firstButtonLocators) {
-        firstButtonEnabled = await this.isPaginationButtonEnabled(locator);
-        if (firstButtonEnabled) break;
-      }
-      
-      if (firstButtonEnabled) {
+      if (firstButton) {
         console.log("\nACTION: Testing First Page navigation...");
         await this.clickFirstPageButton();
         await this.page.waitForTimeout(1000);
-        const firstPageNumber = await this.getCurrentPageNumber();
-        console.log(`INFO: Page number after clicking First: ${firstPageNumber}`);
-        expect(firstPageNumber).toBe(1);
+        expect(await this.getCurrentPageNumber()).toBe(1);
         console.log("ASSERT: Successfully navigated to first page");
       }
     } else if (!nextButtonEnabled && initialPage === 1) {
       console.log("INFO: Next button is disabled on page 1 - may indicate only one page of data");
-      console.log("INFO: Skipping Next Page test, will test Last Page navigation instead");
     }
     
-    // Test Last Page navigation (if enabled)
+    // Test Last Page navigation
     const lastButtonLocators = [
       this.page.locator('.e-last.e-pager-default:not(.e-disable)'),
       this.page.locator('.e-last.e-lastpage:not(.e-disable)'),
       this.page.locator('.e-last:not(.e-disable)'),
       this.page.locator('[title="Go to last page"]:not(.e-disable)')
     ];
+    const lastButton = await this._findEnabledPaginationButton(lastButtonLocators);
     
-    let lastButtonEnabled = false;
-    for (const locator of lastButtonLocators) {
-      lastButtonEnabled = await this.isPaginationButtonEnabled(locator);
-      if (lastButtonEnabled) break;
-    }
-    
-    if (lastButtonEnabled) {
+    if (lastButton) {
       console.log("\nACTION: Testing Last Page navigation...");
       await this.clickLastPageButton();
       await this.page.waitForTimeout(1000);
-      const lastPageNumber = await this.getCurrentPageNumber();
-      console.log(`INFO: Page number after clicking Last: ${lastPageNumber}`);
-      expect(lastPageNumber).toBeGreaterThanOrEqual(1);
+      expect(await this.getCurrentPageNumber()).toBeGreaterThanOrEqual(1);
       console.log("ASSERT: Successfully navigated to last page");
       
-      // After going to last page, verify First Page button is now enabled and navigate back
+      // Test First Page from Last
       const firstButtonLocatorsAfterLast = [
         this.page.locator('.e-first.e-pager-default:not(.e-disable)'),
         this.page.locator('.e-first:not(.e-disable):not(.e-firstpagedisabled)'),
         this.page.locator('[title="Go to first page"]:not(.e-disable)')
       ];
+      const firstButtonAfterLast = await this._findEnabledPaginationButton(firstButtonLocatorsAfterLast);
       
-      let firstButtonEnabledAfterLast = false;
-      for (const locator of firstButtonLocatorsAfterLast) {
-        firstButtonEnabledAfterLast = await this.isPaginationButtonEnabled(locator);
-        if (firstButtonEnabledAfterLast) break;
-      }
-      
-      if (firstButtonEnabledAfterLast) {
+      if (firstButtonAfterLast) {
         console.log("\nACTION: Testing First Page navigation from Last page...");
         await this.clickFirstPageButton();
         await this.page.waitForTimeout(1000);
-        const backToFirstPage = await this.getCurrentPageNumber();
-        console.log(`INFO: Page number after clicking First from Last: ${backToFirstPage}`);
-        expect(backToFirstPage).toBe(1);
+        expect(await this.getCurrentPageNumber()).toBe(1);
         console.log("ASSERT: Successfully navigated back to first page");
       }
     } else {
       console.log("INFO: Last button is disabled - may indicate only one page of data or already on last page");
     }
-    
     console.log("\nASSERT: Pagination navigation functionality is validated");
   }
-
 }
 
 module.exports = { PatientPage };

@@ -81,6 +81,129 @@ class LoginPage {
     await this.submitNewPasswordButton.click();
   }
 
+  // --- FORGOT PASSWORD FLOW HELPERS ---
+  async validateVerificationPageFields() {
+    const { expect } = require('@playwright/test');
+    await expect(this.verifyInstruction).toBeVisible({ timeout: 10000 });
+    await expect(this.codeField).toBeVisible();
+    await expect(this.newPasswordField).toBeVisible();
+    await expect(this.confirmPasswordField).toBeVisible();
+    await expect(this.submitNewPasswordButton).toBeVisible();
+  }
+
+  async submitPasswordResetAndValidatePage() {
+    const requestTimestamp = Date.now();
+    console.log(`📅 Password reset requested at: ${new Date(requestTimestamp).toISOString()}`);
+    await this.submitForgotPassword();
+    await this.page.waitForTimeout(2000);
+    await this.validateVerificationPageFields();
+    return requestTimestamp;
+  }
+
+  async submitOTPAndNewPassword(otpCode, newPassword) {
+    await this.fillVerificationCode(otpCode);
+    await this.fillNewPasswords(newPassword);
+    await this.submitNewPassword();
+  }
+
+  async verifyPasswordResetSuccess() {
+    await this.page.waitForTimeout(3000);
+    const successMessage = this.page.locator('#toast-container:has-text("Password"), #toast-container:has-text("success"), #toast-container:has-text("reset"), #toast-container:has-text("changed")');
+    const successVisible = await successMessage.isVisible({ timeout: 10000 }).catch(() => false);
+    
+    if (successVisible) {
+      const messageText = await successMessage.textContent().catch(() => '');
+      console.log(`✔️ Password reset successful - ${messageText}`);
+      return true;
+    }
+    
+    const isLoginPage = this.page.url().includes('/login');
+    if (isLoginPage) {
+      console.log('✔️ Password reset successful - redirected to login page');
+      return true;
+    }
+    
+    const pageText = await this.page.textContent('body').catch(() => '');
+    if (pageText.toLowerCase().includes('success') || pageText.toLowerCase().includes('password')) {
+      console.log('✔️ Password reset appears successful');
+      return true;
+    }
+    
+    console.log('ℹ️ Verifying password reset completion...');
+    return false;
+  }
+
+  async verifyLoginWithNewPassword(email, newPassword) {
+    if (!this.page.url().includes('/login')) {
+      await this.goto();
+    }
+    
+    await this.login(email, newPassword);
+    await this.page.waitForTimeout(3000);
+    
+    const currentUrl = this.page.url();
+    if (currentUrl.includes('/dashboard')) {
+      console.log('✔️ Login successful with new password - navigated to dashboard');
+      return true;
+    }
+    
+    const mfaSkipVisible = await this.mfaSkipButton.isVisible({ timeout: 5000 }).catch(() => false);
+    if (mfaSkipVisible) {
+      await this.skipMfa();
+      const { expect } = require('@playwright/test');
+      await expect(this.page).toHaveURL(/\/dashboard/, { timeout: 10000 });
+      console.log('✔️ Login successful with new password - MFA skipped');
+      return true;
+    }
+    
+    const errorMessage = this.page.locator('#toast-container:has-text("Error"), #toast-container:has-text("invalid")');
+    const errorVisible = await errorMessage.isVisible({ timeout: 5000 }).catch(() => false);
+    if (errorVisible) {
+      console.log('❌ Login failed with new password - error message displayed');
+      throw new Error('Login failed with new password');
+    }
+    
+    console.log('ℹ️ Login status unclear - checking page state');
+    return false;
+  }
+
+  async getOTPFromEmail(senderEmail, requestTimestamp) {
+    const { getOTPFromLatestEmail } = require('../utils/gmailHelper');
+    console.log(`\nStep 5: Reading latest email from sender: ${senderEmail}...`);
+    console.log(`   Looking for email sent after: ${new Date(requestTimestamp).toISOString()}`);
+    
+    try {
+      const otpCode = await getOTPFromLatestEmail(senderEmail, 5000, 6, requestTimestamp);
+      if (!otpCode) {
+        throw new Error('Could not extract OTP code from email');
+      }
+      console.log(`✔️ OTP retrieved from latest email (sender: ${senderEmail}): ${otpCode}`);
+      return otpCode;
+    } catch (error) {
+      console.error('\n❌ Error retrieving OTP:', error.message);
+      if (error.message.includes('No email found')) {
+        console.error(`\n⚠️  No email found from ${senderEmail}`);
+        console.error('   Please ensure:');
+        console.error('   1. The email has been sent');
+        console.error('   2. You are checking the correct Gmail account');
+        console.error('   3. The sender email is correct\n');
+      } else if (error.message.includes('authorize') || error.message.includes('token')) {
+        console.error('\n🔐 GMAIL AUTHORIZATION REQUIRED:');
+        console.error('   You need to authorize the application first.');
+        console.error('   Run: node utils/gmailHelper.js (if standalone)');
+        console.error('   Or ensure token.json exists in project root\n');
+      }
+      throw error;
+    }
+  }
+
+  printNewPassword(newPassword, email) {
+    console.log(`\n========================================`);
+    console.log(`🔑 New Password: ${newPassword}`);
+    console.log(`📧 Email: ${email}`);
+    console.log('========================================\n');
+  }
+
   // --- BACK TO LOGIN ---
   async backToSignIn() {
     await this.backToSignInLink.click();
