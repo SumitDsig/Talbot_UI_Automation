@@ -1,24 +1,50 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
+    env:
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+      GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
     steps:
     - uses: actions/checkout@v4
+
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+
     - name: Install dependencies
       run: npm ci
+
+    - name: Create .env file from secrets
+      run: |
+        cat > .env << EOF
+        LOGIN_URL=${{ secrets.LOGIN_URL }}
+        LOGIN_USERNAME=${{ secrets.LOGIN_USERNAME }}
+        LOGIN_PASSWORD=${{ secrets.LOGIN_PASSWORD }}
+        BASE_ORIGIN=${{ secrets.BASE_ORIGIN }}
+        TEST_EMAIL=${{ secrets.TEST_EMAIL }}
+        SENDER_EMAIL=${{ secrets.SENDER_EMAIL }}
+        EOF
+        echo "✅ Created .env file"
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+
     - name: Run Playwright tests
       run: npx playwright test
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

@@ -1,57 +1,80 @@
 const { google } = require("googleapis");
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config();
 
 const TOKEN_PATH = path.join(process.cwd(), "token.json");
 const CREDENTIALS_PATH = path.join(process.cwd(), "utils/credentials.json");
 
-async function authorize() {
-    const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
+// async function authorize() {
+//     const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, "utf8"));
 
-    const { client_secret, client_id, redirect_uris } = credentials.installed;
+//     const { client_secret, client_id, redirect_uris } = credentials.installed;
+
+//     const oAuth2Client = new google.auth.OAuth2(
+//         client_id,
+//         client_secret,
+//         redirect_uris[0]
+//     );
+
+//     if (fs.existsSync(TOKEN_PATH)) {
+//         oAuth2Client.setCredentials(
+//             JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"))
+//         );
+//         return oAuth2Client;
+//     }
+
+//     const authUrl = oAuth2Client.generateAuthUrl({
+//         access_type: "offline",
+//         scope: ["https://www.googleapis.com/auth/gmail.readonly"],
+//     });
+
+//     console.log("\n👉 Open this URL in your browser:\n");
+//     console.log(authUrl);
+
+//     const readline = require("readline").createInterface({
+//         input: process.stdin,
+//         output: process.stdout,
+//     });
+
+//     return new Promise((resolve, reject) => {
+//         readline.question("\nPaste the code here: ", async code => {
+//             readline.close();
+
+//             try {
+//                 const { tokens } = await oAuth2Client.getToken(code);
+//                 oAuth2Client.setCredentials(tokens);
+
+//                 fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
+//                 console.log("\n✅ Token saved to:", TOKEN_PATH);
+//                 resolve(oAuth2Client);
+//             } catch (err) {
+//                 reject(err);
+//             }
+//         });
+//     });
+// }
+
+// push to Github Actions
+async function authorize() {
+    const {
+        GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET,
+        GOOGLE_REDIRECT_URI,
+        GOOGLE_REFRESH_TOKEN
+    } = process.env;
 
     const oAuth2Client = new google.auth.OAuth2(
-        client_id,
-        client_secret,
-        redirect_uris[0]
+        GOOGLE_CLIENT_ID,
+        GOOGLE_CLIENT_SECRET,
+        GOOGLE_REDIRECT_URI
     );
 
-    if (fs.existsSync(TOKEN_PATH)) {
-        oAuth2Client.setCredentials(
-            JSON.parse(fs.readFileSync(TOKEN_PATH, "utf8"))
-        );
-        return oAuth2Client;
+    if (GOOGLE_REFRESH_TOKEN) {
+        oAuth2Client.setCredentials({ refresh_token: GOOGLE_REFRESH_TOKEN });
     }
 
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: ["https://www.googleapis.com/auth/gmail.readonly"],
-    });
-
-    console.log("\n👉 Open this URL in your browser:\n");
-    console.log(authUrl);
-
-    const readline = require("readline").createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-
-    return new Promise((resolve, reject) => {
-        readline.question("\nPaste the code here: ", async code => {
-            readline.close();
-
-            try {
-                const { tokens } = await oAuth2Client.getToken(code);
-                oAuth2Client.setCredentials(tokens);
-
-                fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
-                console.log("\n✅ Token saved to:", TOKEN_PATH);
-                resolve(oAuth2Client);
-            } catch (err) {
-                reject(err);
-            }
-        });
-    });
+    return oAuth2Client;
 }
 
 // ---- Decode base64url ----
@@ -98,7 +121,7 @@ async function getLatestEmail(subjectContains, fromEmail = null, maxResults = 10
     let query = '';
     if (subjectContains) query = `subject:${subjectContains}`;
     if (fromEmail) query += query ? ` from:${fromEmail}` : `from:${fromEmail}`;
-    
+
     // Add date filter if timestamp provided (only get emails after this time)
     if (afterTimestamp) {
         // Convert timestamp to Gmail date format (seconds since epoch)
@@ -106,7 +129,7 @@ async function getLatestEmail(subjectContains, fromEmail = null, maxResults = 10
         const dateFilter = `after:${dateSeconds}`;
         query += query ? ` ${dateFilter}` : dateFilter;
     }
-    
+
     if (!query) query = 'is:unread';
 
     const res = await gmail.users.messages.list({
@@ -161,25 +184,25 @@ async function getLatestEmail(subjectContains, fromEmail = null, maxResults = 10
 
 async function getOTPFromLatestEmail(fromEmail, waitTime = 5000, maxRetries = 6, afterTimestamp = null) {
     console.log(`\n⏳ Waiting for latest email from ${fromEmail}...`);
-    console.log(`   Waiting ${waitTime/1000} seconds for email to arrive...`);
-    
+    console.log(`   Waiting ${waitTime / 1000} seconds for email to arrive...`);
+
     if (afterTimestamp) {
         console.log(`   Filtering emails sent after: ${new Date(afterTimestamp).toISOString()}`);
     }
-    
+
     // Wait initially for email to arrive
     await new Promise(resolve => setTimeout(resolve, waitTime));
-    
+
     let emailData = null;
     let lastEmailDate = null;
     let retryCount = 0;
-    
+
     // Retry logic to ensure we get the absolute latest email
     while (retryCount < maxRetries) {
         try {
             // Fetch multiple emails and get the newest one (filtered by timestamp if provided)
             const currentEmail = await getLatestEmail(null, fromEmail, 10, afterTimestamp);
-            
+
             if (!currentEmail) {
                 if (retryCount < maxRetries - 1) {
                     console.log(`   No email found yet, retrying in 3 seconds... (attempt ${retryCount + 1}/${maxRetries})`);
@@ -190,17 +213,17 @@ async function getOTPFromLatestEmail(fromEmail, waitTime = 5000, maxRetries = 6,
                     throw new Error(`No email found from sender: ${fromEmail} after ${maxRetries} attempts`);
                 }
             }
-            
+
             // Check if this is a newer email than the previous one
             const currentDate = parseInt(currentEmail.internalDate) || 0;
             const currentDateObj = new Date(currentDate);
-            
+
             if (lastEmailDate === null || currentDate > lastEmailDate) {
                 // This is a newer email, use it
                 emailData = currentEmail;
                 lastEmailDate = currentDate;
                 console.log(`   ✓ Found newer email dated: ${currentDateObj.toISOString()} (${currentEmail.headers.date || 'N/A'})`);
-                
+
                 // Wait a bit more to see if an even newer email arrives
                 if (retryCount < maxRetries - 1) {
                     console.log(`   Waiting 2 more seconds to check for even newer email...`);
