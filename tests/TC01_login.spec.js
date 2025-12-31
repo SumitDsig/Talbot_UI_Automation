@@ -13,33 +13,63 @@ const validPassword = process.env.LOGIN_PASSWORD;
 test.describe('Login scenarios', () => {
 
     test('TC01 - User cannot login with invalid username and password', async ({ page }) => {
+        console.log('\n=== TC01: Testing login with invalid credentials ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with invalid credentials...');
         await login.login(username, password);
-        await page.locator('#toast-container:has-text("Login Error!!")').waitFor({ state: 'visible' });
-        expect(page.url()).toContain('/login');
+        
+        console.log('\nStep 3: Verifying login error is displayed...');
+        await login.verifyLoginError();
+        
+        console.log('\n✔️ TC01 completed: User cannot login with invalid credentials');
     });
 
     test('TC02 - Login fails with valid username and wrong password', async ({ page }) => {
+        console.log('\n=== TC02: Testing login with valid username and wrong password ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with valid username and wrong password...');
         await login.login(validUsername, password);
-        await page.locator('#toast-container:has-text("Login Error!!")').waitFor({ state: 'visible' });
-        expect(page.url()).toContain('/login');
+        
+        console.log('\nStep 3: Verifying login error is displayed...');
+        await login.verifyLoginError();
+        
+        console.log('\n✔️ TC02 completed: Login fails with valid username and wrong password');
     });
 
     test('TC03 - Login succeeds with valid credentials and user session is saved', async ({ page }) => {
+        console.log('\n=== TC03: Testing successful login with valid credentials ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with valid credentials...');
         await login.login(validUsername, validPassword);
+        
+        console.log('\nStep 3: Handling MFA if present...');
         await login.skipMfa();
-        expect(page.url()).toContain('/dashboard');
+        
+        console.log('\nStep 4: Verifying successful login...');
+        await login.verifyLoginSuccess();
+        
+        console.log('\n✔️ TC03 completed: Login successful with valid credentials');
     });
 
     test('TC04 - Check Forgot Password Flow', async ({ page }) => {
         const login = new LoginPage(page);
-        const testEmail = process.env.TEST_EMAIL || 'test@example.com';
-        const senderEmail = process.env.SENDER_EMAIL || 'admin@example.com';
+        const testEmail = process.env.TEST_EMAIL || 'mishrasum2022@gmail.com';
+        const senderEmail = process.env.SENDER_EMAIL || 'admin@atcemr.com';
         const newPassword = faker.internet.password({ length: 12, memorable: false }) + '@123';
         
         console.log('\n========================================');

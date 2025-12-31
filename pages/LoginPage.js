@@ -7,6 +7,7 @@ class LoginPage {
     this.passwordField = page.getByRole('textbox', { name: 'Password' });
     this.signInButton = page.getByRole('button', { name: 'Sign In' });
     this.mfaSkipButton = page.getByRole('button', { name: ' Skip' });
+    this.loginErrorToast = page.locator('#toast-container:has-text("Login Error!!")');
 
     // Forgot password link
     this.forgotPasswordLink = page.getByRole('link', { name: 'Forgot password?' });
@@ -41,16 +42,44 @@ class LoginPage {
 
   // --- LOGIN ---
   async login(username, password) {
+    console.log(`ACTION: Entering username: ${username}`);
     await this.usernameField.fill(username);
+    console.log(`ACTION: Entering password: ${password ? '***' : '(empty)'}`);
     await this.passwordField.fill(password);
+    console.log('ACTION: Clicking Sign In button...');
     await this.signInButton.click();
+  }
+
+  // --- LOGIN VALIDATION ---
+  async verifyLoginError() {
+    const { expect } = require('@playwright/test');
+    console.log('VALIDATION: Waiting for login error toast...');
+    await this.loginErrorToast.waitFor({ state: 'visible', timeout: 10000 });
+    console.log('✔️ Login error toast is visible');
+    await expect(this.page).toHaveURL(/\/login/);
+    console.log('✔️ User remains on login page');
+  }
+
+  async verifyLoginSuccess() {
+    const { expect } = require('@playwright/test');
+    console.log('VALIDATION: Verifying successful login...');
+    await expect(this.page).toHaveURL(/\/dashboard/, { timeout: 15000 });
+    console.log('✔️ Login successful - navigated to dashboard');
   }
 
   // --- MFA SKIP ---
   async skipMfa() {
+    console.log('ACTION: Checking for MFA skip button...');
     await this.page.waitForTimeout(2000);
-    await this.mfaSkipButton.click();
-    await this.page.waitForTimeout(2000);
+    const mfaVisible = await this.mfaSkipButton.isVisible({ timeout: 5000 }).catch(() => false);
+    if (mfaVisible) {
+      console.log('ACTION: Clicking MFA skip button...');
+      await this.mfaSkipButton.click();
+      await this.page.waitForTimeout(2000);
+      console.log('✔️ MFA skipped');
+    } else {
+      console.log('ℹ️ MFA skip button not found - MFA may not be required');
+    }
   }
 
   // --- FORGOT PASSWORD ACTIONS ---
