@@ -1,7 +1,9 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const { test, expect } = require('@playwright/test');
 const { LoginPage } = require('../pages/LoginPage');
-import { faker } from '@faker-js/faker';
-
+const { faker } = require('@faker-js/faker');
 
 const username = faker.internet.email();
 const password = faker.internet.password();
@@ -11,64 +13,107 @@ const validPassword = process.env.LOGIN_PASSWORD;
 test.describe('Login scenarios', () => {
 
     test('TC01 - User cannot login with invalid username and password', async ({ page }) => {
+        console.log('\n=== TC01: Testing login with invalid credentials ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with invalid credentials...');
         await login.login(username, password);
-        await page.locator('#toast-container:has-text("Login Error!!")').waitFor({ state: 'visible' });
-        expect(page.url()).toContain('/login');
+        
+        console.log('\nStep 3: Verifying login error is displayed...');
+        await login.verifyLoginError();
+        
+        console.log('\n✔️ TC01 completed: User cannot login with invalid credentials');
     });
 
     test('TC02 - Login fails with valid username and wrong password', async ({ page }) => {
+        console.log('\n=== TC02: Testing login with valid username and wrong password ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with valid username and wrong password...');
         await login.login(validUsername, password);
-        await page.locator('#toast-container:has-text("Login Error!!")').waitFor({ state: 'visible' });
-        expect(page.url()).toContain('/login');
+        
+        console.log('\nStep 3: Verifying login error is displayed...');
+        await login.verifyLoginError();
+        
+        console.log('\n✔️ TC02 completed: Login fails with valid username and wrong password');
     });
 
     test('TC03 - Login succeeds with valid credentials and user session is saved', async ({ page }) => {
+        console.log('\n=== TC03: Testing successful login with valid credentials ===');
         const login = new LoginPage(page);
+        
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
+        
+        console.log('\nStep 2: Attempting login with valid credentials...');
         await login.login(validUsername, validPassword);
+        
+        console.log('\nStep 3: Handling MFA if present...');
         await login.skipMfa();
-        expect(page.url()).toContain('/dashboard');
+        
+        console.log('\nStep 4: Verifying successful login...');
+        await login.verifyLoginSuccess();
+        
+        console.log('\n✔️ TC03 completed: Login successful with valid credentials');
     });
 
     test('TC04 - Check Forgot Password Flow', async ({ page }) => {
         const login = new LoginPage(page);
+        const testEmail = process.env.TEST_EMAIL || 'mishrasum2022@gmail.com';
+        const senderEmail = process.env.SENDER_EMAIL || 'admin@atcemr.com';
+        const newPassword = faker.internet.password({ length: 12, memorable: false }) + '@123';
+        
+        console.log('\n========================================');
+        console.log(`📝 Generated New Password: ${newPassword}`);
+        console.log('========================================\n');
 
-        // 1️⃣ Navigate to Login page
+        // Step 1: Go to login page
+        console.log('Step 1: Navigating to login page...');
         await login.goto();
+        console.log('✔️ Login page loaded');
 
-        // 2️⃣ Click "Forgot password?"
+        // Step 2: Click on forget password and navigate to forget password page
+        console.log('\nStep 2: Clicking on "Forgot password?" link...');
         await login.openForgotPassword();
+        await expect(page).toHaveURL(/\/forgotpassword/);
+        console.log('✔️ Navigated to forgot password page');
 
-        // 3️⃣ Validate Forgot Password page content
-        await expect(login.fpHeader).toBeVisible();
-        await expect(login.fpInstruction).toBeVisible();
+        // Step 3: Fill email address
+        console.log('\nStep 3: Filling email address...');
+        await login.fillForgotPasswordEmail(testEmail);
+        console.log(`✔️ Entered email: ${testEmail}`);
 
-        // 4️⃣ Enter email using faker
-        const randomEmail = faker.internet.email();
-        await login.fillForgotPasswordEmail(randomEmail);
-        console.log(`✔️ Entered email: ${randomEmail}`);
+        // Step 4: Submit password reset and validate verification page
+        console.log('\nStep 4: Clicking "Reset my Password" button...');
+        const requestTimestamp = await login.submitPasswordResetAndValidatePage();
+        console.log('✔️ Verification Code page loaded with all required fields');
 
-        // 5️⃣ Submit forgot password request
-        await login.submitForgotPassword();
+        // Step 5: Get OTP from latest email
+        const otpCode = await login.getOTPFromEmail(senderEmail, requestTimestamp);
 
-        // 6️⃣ Validate Verification Code page UI
-        await expect(login.verifyInstruction).toBeVisible();
-        await expect(login.codeField).toBeVisible();
-        await expect(login.newPasswordField).toBeVisible();
-        await expect(login.confirmPasswordField).toBeVisible();
-        await expect(login.submitNewPasswordButton).toBeVisible();
-        console.log('✔️ Verification Code page loaded');
+        // Step 6: Submit OTP and new password, validate success
+        console.log('\nStep 6: Submitting OTP and new password...');
+        await login.submitOTPAndNewPassword(otpCode, newPassword);
+        console.log(`✔️ Entered OTP code: ${otpCode}`);
+        console.log(`✔️ Entered new password: ${newPassword}`);
+        console.log('✔️ Submitted new password');
+        await login.verifyPasswordResetSuccess();
 
-        // 7️⃣ Click "Back to Sign In"
-        await login.backToSignIn();
+        // Step 7: Print new password and verify login
+        console.log('\nStep 7: Testing login with new password...');
+        login.printNewPassword(newPassword, testEmail);
+        await login.verifyLoginWithNewPassword(testEmail, newPassword);
 
-        // 8️⃣ Validate user returned to login page
-        await expect(page).toHaveURL(/\/login/);
-        console.log('✔️ Returned to Login page successfully');
+        console.log('\n✔️ Forgot Password Flow completed successfully');
+        console.log(`✔️ New password verified: ${newPassword}`);
     });
-
 });

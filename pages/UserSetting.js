@@ -10,7 +10,9 @@ export class DashboardLocators {
         this.avatarIcon = page.locator('img.userProfilePicture[alt="Avatar"]');
         this.userSettingsButton = page.getByText('User Settings', { exact: true });
         this.userSettingsModal = page.locator('patient-capture-signature');
-        this.setupDigitalSignatureMenu = page.locator('.side-menu.active-menu', { hasText: 'Set-up Digital Signature' });
+        // Setup Digital Signature menu - scoped to modal's list-group (menu area)
+        this.setupDigitalSignatureMenu = this.userSettingsModal.locator('.list-group').getByText('Set-up Digital Signature', { exact: true });
+        this.setupDigitalSignatureMenuActive = this.userSettingsModal.locator('.list-group').locator('.active-menu, [class*="active"]').filter({ hasText: 'Set-up Digital Signature' });
         this.signatureImage = page.locator('img[src^="data:image/png"]');
         this.clearButton = page.locator('button.btn.btn-danger', { hasText: 'Clear' });
         this.signPadButton = page.locator('button.btn.btn-primary', { hasText: 'Sign With SignaturePad' });
@@ -41,9 +43,11 @@ export class DashboardLocators {
             "TFA/Dual Mobile Activation"
         ];
 
-        // Left menu locators
-        this.leftMenuItems = page.locator('.left-menu .side-menu');
-        this.providerAvailabilityMenu = page.locator('.side-menu', { hasText: 'Provider Availability' });
+        // Left menu locators - menu items are in .list-group within the modal
+        // Each menu item is a generic element containing text (they're clickable divs)
+        // Use a more generic selector that finds all clickable menu items
+        this.leftMenuItems = this.userSettingsModal.locator('.list-group > *');
+        this.providerAvailabilityMenu = this.userSettingsModal.locator('.list-group').getByText('Provider Availability', { exact: true });
 
         // Provider Availability Grid
         this.providerAvailabilityGrid = page.locator('.e-gridcontent');

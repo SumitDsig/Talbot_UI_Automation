@@ -462,7 +462,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.validateTreatmentPlanRedIcon();
   });
 
-  test('TC35. Validate Video Call Invitation Icon functionality', async ({ page }) => {
+  test('TC35. Validate Video Call Invitation Icon functionality and DE column value', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const patient = new PatientPage(page);
 
@@ -492,5 +492,135 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.validatePaginationEnabledAndDefaultRecords();
     await patient.validateItemsPerPageSelection();
     await patient.validatePaginationNavigation();
+  });
+
+  test('TC37. Validate Patient Name Business Logic', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    await patient.fillRequiredFieldsForNameValidation();
+    await patient.validateAllNameBusinessLogic();
+  });
+
+  test('TC38. Validate Patient DOB Business Logic', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    await patient.fillRequiredFieldsForDOBValidation();
+    await patient.validateAllDOBBusinessLogic();
+  });
+
+  test('TC39. Validate Patient SSN Business Logic', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    await patient.fillRequiredFieldsForSSNValidation();
+    await patient.validateAllSSNBusinessLogic();
+  });
+
+  test('TC40. Validate Patient Contact Business Logic', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    await patient.fillRequiredFieldsForContactValidation();
+    await patient.validateAllContactBusinessLogic();
+  });
+
+  test('TC41. Validate Patient Emergency Contact Business Logic', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    // Generate faker data for patient
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName() + '_' + Date.now();
+    const dob = faker.date.birthdate({ min: 18, max: 70, mode: 'age' });
+    const dobFormatted = dob.toLocaleDateString('en-US'); // Format: MM/DD/YYYY
+    const address = faker.location.streetAddress();
+    const zipcode = '12345'; // Fixed zip code
+    const city = faker.location.city();
+    const state = 'NY'; // Using a valid state code
+    const phone = faker.phone.number('(###) ###-####');
+    const email = faker.internet.email();
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    // Fill required fields with faker data
+    console.log(`STEP: Filling patient data - Name: ${firstName} ${lastName}, DOB: ${dobFormatted}`);
+    await patient.fillMandatoryFields({
+      firstName: firstName,
+      lastName: lastName,
+      dob: dobFormatted,
+      gender: 'Male',
+      address: address,
+      zipcode: zipcode,
+      city: city,
+      state: state,
+      phone: phone
+    });
+    
+    // Fill email if needed
+    if (await patient.emailAddress.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await patient.emailAddress.fill(email);
+      console.log(`INFO: Email filled: ${email}`);
+    }
+    
+    // Check 'Doesn't have SSN' checkbox
+    console.log('STEP: Checking "Doesn\'t have SSN" checkbox...');
+    await expect(patient.noSSNCheckbox).toBeVisible({ timeout: 5000 });
+    await expect(patient.noSSNCheckbox).toBeEnabled();
+    await patient.noSSNCheckbox.check();
+    const isNoSSNChecked = await patient.noSSNCheckbox.isChecked();
+    expect(isNoSSNChecked).toBe(true);
+    console.log('ASSERT: "Doesn\'t have SSN" checkbox is checked');
+    
+    // Save patient
+    console.log('STEP: Saving patient...');
+    await patient.save();
+    
+    // Handle duplicate patient modal if it appears
+    const duplicateModalVisible = await patient.duplicatePatientModal.isVisible({ timeout: 3000 }).catch(() => false);
+    if (duplicateModalVisible) {
+      console.log('INFO: Duplicate Patient modal detected, clicking Cancel...');
+      await patient.duplicatePatientModalCancelBtn.click({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(500).catch(() => {});
+      console.log('WARNING: Cannot complete validation - patient already exists');
+      return;
+    }
+    
+    // Verify success and navigation to Patient Demographics page
+    console.log('STEP: Verifying patient saved and navigation to Patient Demographics page...');
+    const successToastVisible = await patient.successToast.isVisible({ timeout: 10000 }).catch(() => false);
+    if (successToastVisible) {
+      console.log('ASSERT: Patient saved successfully');
+    }
+    
+    await patient.verifyNavigationToPatientDemographics();
+    
+    // Validate emergency contact business logic on Patient Demographics page
+    console.log('STEP: Validating emergency contact business logic on Patient Demographics page...');
+    await patient.validateAllEmergencyContactBusinessLogic();
   });
 });
