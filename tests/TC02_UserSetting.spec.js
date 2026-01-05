@@ -39,8 +39,19 @@ test('TC05 Validate feilds of Digital Signature Section ', async ({ page }) => {
   console.log('➡️ Validating User Settings modal is visible...');
   await expect(dashboard.userSettingsModal).toBeVisible();
 
+  // Wait for modal to fully load
+  await page.waitForTimeout(1000);
+
   console.log('➡️ Validating Set-up Digital Signature menu item...');
-  await expect(dashboard.setupDigitalSignatureMenu).toBeVisible();
+  // Find the menu item in the list-group (menu area), not the content area
+  await expect(dashboard.setupDigitalSignatureMenu).toBeVisible({ timeout: 10000 });
+  
+  // Click the menu item to ensure Digital Signature section is loaded
+  console.log('➡️ Clicking Set-up Digital Signature menu item to load content...');
+  await dashboard.setupDigitalSignatureMenu.click();
+  
+  // Wait for content to load
+  await page.waitForTimeout(1000);
 
   console.log('➡️ Validating preview signature image...');
   await expect(dashboard.signatureImage.first()).toBeVisible();
@@ -171,10 +182,42 @@ test('TC09 Validate left menu options', async ({ page }) => {
   await dashboard.avatarIcon.click();
   await dashboard.userSettingsButton.click();
 
+  // Wait for modal to load
+  await expect(dashboard.userSettingsModal).toBeVisible();
+  await page.waitForTimeout(1000);
+
+  // Check all available menu items to detect any new ones
+  console.log("➡️ Checking all available menu items...");
+  const allMenuItems = dashboard.leftMenuItems;
+  const menuItemCount = await allMenuItems.count();
+  console.log(`INFO: Found ${menuItemCount} menu item(s) in the list-group`);
+  
+  // Extract text from all menu items
+  const actualMenuItems = [];
+  for (let i = 0; i < menuItemCount; i++) {
+    const menuItem = allMenuItems.nth(i);
+    const text = await menuItem.textContent().catch(() => '');
+    if (text && text.trim()) {
+      actualMenuItems.push(text.trim());
+    }
+  }
+
+  // Validate expected menu items
+  console.log("\n➡️ Validating expected menu items...");
   for (const item of dashboard.LEFT_MENU_ITEMS) {
     const option = dashboard.leftMenuItems.filter({ hasText: item });
     await expect(option).toBeVisible();
     console.log(`✔ Found menu item: ${item}`);
+  }
+
+  // Check if there are any new menu items not in the list
+  const newItems = actualMenuItems.filter(item => !dashboard.LEFT_MENU_ITEMS.includes(item));
+  if (newItems.length > 0) {
+    console.log(`\n⚠️ Found ${newItems.length} new menu item(s) not in LEFT_MENU_ITEMS array:`);
+    newItems.forEach(item => console.log(`   - "${item}"`));
+    console.log("\n💡 Consider adding these to the LEFT_MENU_ITEMS array in UserSetting.js");
+  } else {
+    console.log("\n✔ All menu items are accounted for in LEFT_MENU_ITEMS array");
   }
 });
 

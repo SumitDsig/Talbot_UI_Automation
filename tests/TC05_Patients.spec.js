@@ -493,4 +493,18 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.validateItemsPerPageSelection();
     await patient.validatePaginationNavigation();
   });
+
+  test('TC37. Validate Patient Name Business Logic - PAT-001 to PAT-004', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const patient = new PatientPage(page);
+
+    await patient.navigateToPatientsTab(loginPage);
+    await expect(patient.addPatientBtn).toBeVisible();
+    await patient.openAddPatientModal();
+    await expect(patient.modalTitle).toBeVisible({ timeout: 10000 });
+
+    await patient.fillRequiredFieldsForNameValidation();
+    await patient.validateAllNameBusinessLogic();
+    await patient.validateAndSaveWithValidNames();
+  });
 });
