@@ -255,6 +255,43 @@ class LoginPage {
     await this.page.waitForURL('**/dashboard', { timeout: 15000 });
     await this.page.waitForTimeout(2000); // Allow page to stabilize
   }
+
+  // --- SESSION MANAGEMENT ---
+  async saveSession() {
+    const fs = require('fs');
+    console.log('ACTION: Saving user session...');
+    
+    // Extract localStorage (needed for Cognito/SPA apps)
+    const localStorage = await this.page.evaluate(() => {
+      const data = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        data[key] = localStorage.getItem(key);
+      }
+      return data;
+    });
+    
+    // Extract cookies
+    const state = await this.page.context().storageState();
+    
+    // Merge cookies + localStorage
+    const fullState = {
+      ...state,
+      origins: [
+        {
+          origin: process.env.BASE_ORIGIN || "https://talbot-dev-newui.atcemr.com",
+          localStorage: Object.entries(localStorage).map(([name, value]) => ({
+            name,
+            value
+          }))
+        }
+      ]
+    };
+    
+    // Write final session file
+    fs.writeFileSync("authState.json", JSON.stringify(fullState, null, 2));
+    console.log('✔️ Session saved successfully to authState.json');
+  }
 }
 
 module.exports = { LoginPage };

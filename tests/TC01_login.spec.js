@@ -63,7 +63,10 @@ test.describe('Login scenarios', () => {
         console.log('\nStep 4: Verifying successful login...');
         await login.verifyLoginSuccess();
         
-        console.log('\n✔️ TC03 completed: Login successful with valid credentials');
+        console.log('\nStep 5: Saving user session...');
+        await login.saveSession();
+        
+        console.log('\n✔️ TC03 completed: Login successful with valid credentials and session saved');
     });
 
     test('TC04 - Check Forgot Password Flow', async ({ page }) => {
