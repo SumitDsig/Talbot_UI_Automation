@@ -595,7 +595,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.validateAllEmergencyContactBusinessLogic();
   });
 
-  test.only('TC41. Validate Patient Duplicate Detection Business Logic', async ({ page }) => {
+  test('TC41. Validate Patient Duplicate Detection Business Logic', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const patient = new PatientPage(page);
 
