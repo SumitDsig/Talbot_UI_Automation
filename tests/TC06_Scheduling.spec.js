@@ -6,7 +6,7 @@ test.use({ storageState: 'authState.json' });
 
 test.describe('Scheduling Module - Add Appointment/Event', () => {
 
-  test('TC37. Validate Add Event popup functionality', async ({ page }) => {
+  test('TC41. Validate Add Event popup functionality', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 
@@ -36,7 +36,7 @@ test.describe('Scheduling Module - Add Appointment/Event', () => {
     console.log('\n✓ TEST COMPLETED: All validations passed successfully');
   });
 
-  test('TC38. Validate Appointment/Event selection and Event Type dropdown', async ({ page }) => {
+  test('TC42. Validate Appointment/Event selection and Event Type dropdown', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 
@@ -89,7 +89,7 @@ test.describe('Scheduling Module - Add Appointment/Event', () => {
     console.log('\n✓ TEST COMPLETED: All validations passed successfully');
   });
 
-  test('TC39. Validate Event Type, Start Time, Duration, End Time, and Edit Time controls', async ({ page }) => {
+  test('TC43. Validate Event Type, Start Time, Duration, End Time, and Edit Time controls', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 
@@ -117,7 +117,7 @@ test.describe('Scheduling Module - Add Appointment/Event', () => {
     console.log('\n✓ TEST COMPLETED: All validations passed successfully');
   });
 
-  test('TC40. Validate Event Title, Description, and Open Slot for Appointment Question', async ({ page }) => {
+  test('TC44. Validate Event Title, Description, and Open Slot for Appointment Question', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 
@@ -142,7 +142,7 @@ test.describe('Scheduling Module - Add Appointment/Event', () => {
     console.log('\n✓ TEST COMPLETED: All validations passed successfully');
   });
 
-  test('TC41. Validate Yes Radio Selection, Save and Cancel buttons functionality', async ({ page }) => {
+  test('TC45. Validate Yes Radio Selection, Save and Cancel buttons functionality', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 
@@ -183,7 +183,7 @@ test.describe('Scheduling Module - Add Appointment/Event', () => {
     console.log('\n✓ TEST COMPLETED: All validations passed successfully');
   });
 
-  test('TC42. Validate Created Event Display on Scheduler', async ({ page }) => {
+  test('TC46. Validate Created Event Display on Scheduler', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const schedulingPage = new SchedulingPage(page);
 

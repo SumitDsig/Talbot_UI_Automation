@@ -11,9 +11,10 @@ node_modules/
 token.json
 utils/credentials.json
 authState.json
-*.env
 .env
 .env.local
+.env*.local
+
 
 # IDE
 .vscode/

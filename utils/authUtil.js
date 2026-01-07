@@ -43,7 +43,7 @@ export async function loginAndSaveSession(page) {
     ...state,
     origins: [
       {
-        origin: process.env.BASE_ORIGIN || "https://talbot-dev.atcemr.com",
+        origin: process.env.BASE_ORIGIN || "https://talbot-dev-newui.atcemr.com",
         localStorage: Object.entries(localStorage).map(([name, value]) => ({
           name,
           value
