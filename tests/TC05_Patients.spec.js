@@ -291,7 +291,7 @@ test.describe('Patient Module - Add Patient Flow', () => {
     await patient.verifyInsurancePolicySuccessToast();
   });
 
-  test.only('TC26. Validate Card View and Table View functionality', async ({ page }) => {
+  test('TC26. Validate Card View and Table View functionality', async ({ page }) => {
     const loginPage = new LoginPage(page);
     const patient = new PatientPage(page);
 
