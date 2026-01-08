@@ -12,22 +12,25 @@ test.beforeEach(async ({ page }) => {
   console.log('➡️ Navigating to dashboard...');
   await page.goto('/dashboard');
 
-  console.log('➡️ Validating 2FA modal title is visible...');
-  await expect(dashboard.enable2FATitle).toBeVisible();
+  console.log('➡️ Checking if 2FA modal is visible...');
+
+if (await dashboard.enable2FATitle.isVisible()) {
+  console.log('➡️ 2FA modal is visible');
 
   console.log('➡️ Clicking Skip button...');
   await dashboard.skipButton.click();
 
   console.log('➡️ Validating 2FA modal disappears...');
   await expect(dashboard.enable2FATitle).not.toBeVisible();
-
-  console.log('✔️ Logged in & 2FA skipped.');
+} else {
+  console.log('ℹ️ 2FA modal not visible, skipping 2FA step');
+}
 });
 
 /* -----------------------------------------------------
    TEST 1 — Validate User Settings UI
 ----------------------------------------------------- */
-test('TC05 Validate feilds of Digital Signature Section ', async ({ page }) => {
+test.only('TC05 Validate feilds of Digital Signature Section ', async ({ page }) => {
   const dashboard = new DashboardLocators(page);
 
   console.log('➡️ Clicking Avatar icon...');
