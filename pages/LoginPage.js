@@ -48,10 +48,10 @@ class LoginPage {
     console.log(`ACTION: Entering password: ${password ? '***' : '(empty)'}`);
     await this.passwordField.fill(password);
     console.log('ACTION: Clicking Sign In button...');
-    
+
     // Click and wait for navigation or response
     await this.signInButton.click();
-    
+
     // Wait for either navigation to dashboard, MFA page, or MFA button to appear
     const timeout = process.env.CI ? 30000 : 15000;
     try {
@@ -66,7 +66,7 @@ class LoginPage {
       // Continue even if none of the conditions are met
       console.log('INFO: Login click completed, waiting for next step...');
     }
-    
+
     console.log(`ACTION: Login request submitted. Current URL: ${this.page.url()}`);
   }
 
@@ -74,23 +74,23 @@ class LoginPage {
   async verifyLoginError() {
     const { expect } = require('@playwright/test');
     console.log('VALIDATION: Waiting for login error toast...');
-    
+
     // Check if we're already on login page (network might be faster)
     const isOnLoginPage = this.page.url().includes('/login');
-    
+
     // Use a longer timeout for CI environments (30 seconds)
     const timeout = process.env.CI ? 30000 : 15000;
-    
+
     // First, wait for toast container to appear (more reliable)
     const toastContainer = this.page.locator('#toast-container');
     await toastContainer.waitFor({ state: 'visible', timeout: timeout });
     console.log('✔️ Toast container is visible');
-    
+
     // Then check for error content with a more flexible approach
-    const errorToast = this.page.locator('#toast-container').filter({ 
-      hasText: /login error|invalid|incorrect|wrong password|authentication failed|error/i 
+    const errorToast = this.page.locator('#toast-container').filter({
+      hasText: /login error|invalid|incorrect|wrong password|authentication failed|error/i
     });
-    
+
     try {
       await errorToast.waitFor({ state: 'visible', timeout: 5000 });
       const errorText = await errorToast.textContent().catch(() => '');
@@ -104,7 +104,7 @@ class LoginPage {
         throw new Error('Login error toast did not appear or was empty');
       }
     }
-    
+
     // Verify we're still on login page
     await expect(this.page).toHaveURL(/\/login/);
     console.log('✔️ User remains on login page');
@@ -113,10 +113,10 @@ class LoginPage {
   async verifyLoginSuccess() {
     const { expect } = require('@playwright/test');
     console.log('VALIDATION: Verifying successful login...');
-    
+
     // Use longer timeout for CI
     const timeout = process.env.CI ? 30000 : 20000;
-    
+
     // Wait for navigation to dashboard with multiple strategies
     try {
       // Strategy 1: Wait for URL change to dashboard
@@ -129,7 +129,7 @@ class LoginPage {
         console.log(`✔️ Already on dashboard: ${currentUrl}`);
         return;
       }
-      
+
       // Strategy 3: Wait for network to be idle and check again
       console.log('INFO: Waiting for network to be idle...');
       try {
@@ -138,12 +138,12 @@ class LoginPage {
         // Continue even if networkidle times out
         console.log('INFO: Network idle timeout, continuing...');
       }
-      
+
       // Check URL again after network settles
       await expect(this.page).toHaveURL(/\/dashboard/, { timeout: 5000 });
       console.log(`✔️ Login successful - navigated to dashboard: ${this.page.url()}`);
     }
-    
+
     // Ensure page is fully loaded
     await this.page.waitForLoadState('domcontentloaded');
     console.log('✔️ Dashboard page loaded successfully');
@@ -153,23 +153,23 @@ class LoginPage {
   async skipMfa() {
     console.log('ACTION: Checking for MFA skip button...');
     const timeout = process.env.CI ? 20000 : 10000;
-    
+
     // Wait a bit for page to settle after login
     await this.page.waitForTimeout(1000);
-    
+
     // Check if we're already past MFA (on dashboard)
     const currentUrl = this.page.url();
     if (currentUrl.includes('/dashboard')) {
       console.log('ℹ️ Already on dashboard - MFA not required or already handled');
       return;
     }
-    
+
     // Check for MFA skip button with longer timeout in CI
     const mfaVisible = await this.mfaSkipButton.isVisible({ timeout: timeout }).catch(() => false);
     if (mfaVisible) {
       console.log('ACTION: MFA skip button found, clicking...');
       await this.mfaSkipButton.click();
-      
+
       // Wait for navigation to dashboard after clicking MFA skip
       try {
         await this.page.waitForURL(/\/dashboard/, { timeout: timeout });
@@ -256,25 +256,25 @@ class LoginPage {
     await this.page.waitForTimeout(3000);
     const successMessage = this.page.locator('#toast-container:has-text("Password"), #toast-container:has-text("success"), #toast-container:has-text("reset"), #toast-container:has-text("changed")');
     const successVisible = await successMessage.isVisible({ timeout: 10000 }).catch(() => false);
-    
+
     if (successVisible) {
       const messageText = await successMessage.textContent().catch(() => '');
       console.log(`✔️ Password reset successful - ${messageText}`);
       return true;
     }
-    
+
     const isLoginPage = this.page.url().includes('/login');
     if (isLoginPage) {
       console.log('✔️ Password reset successful - redirected to login page');
       return true;
     }
-    
+
     const pageText = await this.page.textContent('body').catch(() => '');
     if (pageText.toLowerCase().includes('success') || pageText.toLowerCase().includes('password')) {
       console.log('✔️ Password reset appears successful');
       return true;
     }
-    
+
     console.log('ℹ️ Verifying password reset completion...');
     return false;
   }
@@ -283,16 +283,16 @@ class LoginPage {
     if (!this.page.url().includes('/login')) {
       await this.goto();
     }
-    
+
     await this.login(email, newPassword);
     await this.page.waitForTimeout(3000);
-    
+
     const currentUrl = this.page.url();
     if (currentUrl.includes('/dashboard')) {
       console.log('✔️ Login successful with new password - navigated to dashboard');
       return true;
     }
-    
+
     const mfaSkipVisible = await this.mfaSkipButton.isVisible({ timeout: 5000 }).catch(() => false);
     if (mfaSkipVisible) {
       await this.skipMfa();
@@ -301,14 +301,14 @@ class LoginPage {
       console.log('✔️ Login successful with new password - MFA skipped');
       return true;
     }
-    
+
     const errorMessage = this.page.locator('#toast-container:has-text("Error"), #toast-container:has-text("invalid")');
     const errorVisible = await errorMessage.isVisible({ timeout: 5000 }).catch(() => false);
     if (errorVisible) {
       console.log('❌ Login failed with new password - error message displayed');
       throw new Error('Login failed with new password');
     }
-    
+
     console.log('ℹ️ Login status unclear - checking page state');
     return false;
   }
@@ -317,7 +317,7 @@ class LoginPage {
     const { getOTPFromLatestEmail } = require('../utils/gmailHelper');
     console.log(`\nStep 5: Reading latest email from sender: ${senderEmail}...`);
     console.log(`   Looking for email sent after: ${new Date(requestTimestamp).toISOString()}`);
-    
+
     try {
       const otpCode = await getOTPFromLatestEmail(senderEmail, 5000, 6, requestTimestamp);
       if (!otpCode) {
@@ -360,14 +360,15 @@ class LoginPage {
   async navigateToDashboard() {
     console.log('Navigating to dashboard...');
     await this.page.goto('/dashboard');
-    
-    // Handle MFA skip if it appears
-    try {
+
+    // ✅ Skip MFA only if it appears
+    if (await this.skipMfaTitle.isVisible({ timeout: 3000 }).catch(() => false)) {
+      console.log('➡️ MFA modal detected, skipping MFA...');
       await this.skipMfa();
-    } catch (e) {
-      console.log('MFA skip not needed or failed');
+    } else {
+      console.log('ℹ️ MFA modal not shown, continuing...');
     }
-    
+
     // Wait for dashboard to load
     await this.page.waitForURL('**/dashboard', { timeout: 15000 });
     await this.page.waitForTimeout(2000); // Allow page to stabilize
@@ -377,7 +378,7 @@ class LoginPage {
   async saveSession() {
     const fs = require('fs');
     console.log('ACTION: Saving user session...');
-    
+
     // Extract localStorage (needed for Cognito/SPA apps)
     const localStorage = await this.page.evaluate(() => {
       const data = {};
@@ -387,10 +388,10 @@ class LoginPage {
       }
       return data;
     });
-    
+
     // Extract cookies
     const state = await this.page.context().storageState();
-    
+
     // Merge cookies + localStorage
     const fullState = {
       ...state,
@@ -404,7 +405,7 @@ class LoginPage {
         }
       ]
     };
-    
+
     // Write final session file
     fs.writeFileSync("authState.json", JSON.stringify(fullState, null, 2));
     console.log('✔️ Session saved successfully to authState.json');
