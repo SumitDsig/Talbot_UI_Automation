@@ -105,12 +105,68 @@ class PortalRequestsPage {
     await this.page.waitForTimeout(500); // Brief wait after loading completes
   }
 
+  async getGridRecordCount() {
+    console.log('ACTION: Getting grid record count...');
+    
+    // METHOD 1: Try pagination first (fastest and most reliable)
+    try {
+      const paginationContent = await this.paginationText.textContent({ timeout: 3000 });
+      const countMatch = paginationContent.match(/(\d+)\s+items?/i);
+      
+      if (countMatch) {
+        const count = parseInt(countMatch[1]);
+        console.log(`ASSERT: Grid record count from pagination: ${count}`);
+        return count;
+      }
+    } catch (e) {
+      console.log('  INFO: Pagination not available, trying alternative methods...');
+    }
+    
+    // METHOD 2: Check for "No records to display" message
+    const noRecordsLocator = this.page.locator('text=/no records to display|no data/i').first();
+    const hasNoRecords = await noRecordsLocator.isVisible({ timeout: 1000 }).catch(() => false);
+    
+    if (hasNoRecords) {
+      console.log('ASSERT: Grid record count: 0 (No records message displayed)');
+      return 0;
+    }
+    
+    // METHOD 3: Count visible rows that contain gridcells (actual data rows)
+    console.log('  INFO: Counting visible data rows with gridcells...');
+    const rows = this.page.locator('[role="row"]');
+    const totalRows = await rows.count();
+    
+    let dataRowCount = 0;
+    
+    // Start from index 1 to skip header row (index 0)
+    for (let i = 1; i < totalRows; i++) {
+      const row = rows.nth(i);
+      
+      // Check if row is visible
+      const isVisible = await row.isVisible().catch(() => false);
+      if (!isVisible) {
+        continue;
+      }
+      
+      // Check if row has gridcells (data rows have gridcells, empty/message rows don't)
+      const gridcells = row.locator('[role="gridcell"]');
+      const cellCount = await gridcells.count();
+      
+      if (cellCount > 0) {
+        dataRowCount++;
+      }
+    }
+    
+    console.log(`ASSERT: Grid record count from visible rows: ${dataRowCount}`);
+    return dataRowCount;
+  }
+
   async testColumnDualClickSorting(colIndex, columnName) {
     console.log(`\n🔤 Testing ${columnName} Column Sorting...`);
     
     // Get initial values before sorting
-    const initialValues = await this.getColumnValues(colIndex, 5);
-    console.log(`  Initial values (first 5): ${initialValues.join(', ')}`);
+    const initialValues = await this.getColumnValues(colIndex);
+    console.log(`  Initial values (all ${initialValues.length} rows): ${initialValues.join(', ')}`);
 
     // CLICK 1: Test Ascending Order
     console.log(`  ACTION: Clicking ${columnName} header (1st click - expect ascending)...`);
@@ -120,14 +176,14 @@ class PortalRequestsPage {
     console.log(`  ACTION: Waiting for loading spinner to complete...`);
     await this.waitForLoadingSpinnerToComplete();
 
-    const ascValues = await this.getColumnValues(colIndex, 5);
-    console.log(`  Values after 1st click: ${ascValues.join(', ')}`);
+    const ascValues = await this.getColumnValues(colIndex);
+    console.log(`  Values after 1st click (${ascValues.length} rows): ${ascValues.join(', ')}`);
     const isAscending = await this.verifyColumnSorted(colIndex, 'asc');
 
     if (isAscending) {
       console.log(`  ✅ SUCCESS: ${columnName} column sorted in ASCENDING order`);
     } else {
-      console.log(`  ❌ WARNING: ${columnName} column sorting in ascending order could not be verified`);
+      throw new Error(`${columnName} column is NOT sorted in ascending order after 1st click`);
     }
 
     // CLICK 2: Test Descending Order
@@ -138,20 +194,21 @@ class PortalRequestsPage {
     console.log(`  ACTION: Waiting for loading spinner to complete...`);
     await this.waitForLoadingSpinnerToComplete();
 
-    const descValues = await this.getColumnValues(colIndex, 5);
-    console.log(`  Values after 2nd click: ${descValues.join(', ')}`);
+    const descValues = await this.getColumnValues(colIndex);
+    console.log(`  Values after 2nd click (${descValues.length} rows): ${descValues.join(', ')}`);
     const isDescending = await this.verifyColumnSorted(colIndex, 'desc');
 
     if (isDescending) {
       console.log(`  ✅ SUCCESS: ${columnName} column sorted in DESCENDING order`);
     } else {
-      console.log(`  ⚠️  WARNING: ${columnName} column sorting in descending order could not be verified`);
+      throw new Error(`${columnName} column is NOT sorted in descending order after 2nd click`);
     }
 
     // Reset button before next column
     console.log(`  ACTION: Clicking Reset button...`);
     await this.clickResetButton();
-    await this.page.waitForTimeout(500);
+    console.log(`  ACTION: Waiting for loading spinner to complete...`);
+    await this.waitForLoadingSpinnerToComplete();
     console.log(`  ✓ Reset completed for ${columnName} column\n`);
   }
 
@@ -470,14 +527,22 @@ class PortalRequestsPage {
     await this.page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
   }
 
-  async getColumnValues(colIndex, maxRows = 10) {
+  async getColumnValues(colIndex, maxRows = 20) {
     const values = [];
     const rows = this.patientPortalGrid.locator('[role="row"]');
     const rowCount = await rows.count();
     const rowsToCheck = Math.min(rowCount, maxRows);
     
+    // Check up to maxRows on the first page (skip header row at index 0)
     for (let i = 1; i < rowsToCheck; i++) {
       const row = rows.nth(i);
+      
+      // Check if row is visible
+      const isVisible = await row.isVisible().catch(() => false);
+      if (!isVisible) {
+        continue;
+      }
+      
       const cell = row.locator(`td[data-colindex="${colIndex}"]`);
       if (await cell.count() > 0) {
         const cellText = await cell.textContent().catch(() => '');

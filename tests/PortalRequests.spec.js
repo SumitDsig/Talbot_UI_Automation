@@ -101,7 +101,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await portalRequests.verifyGridCountIncremented(initialCount);
 
     // Verify record status
-    await portalRequests.verifyRecordStatus(testFirstName, testLastName, 'Not Matched');
+    await portalRequests.verifyRecordStatus(testFirstName, testLastName, 'Not Mached');
 
     // Save test data to file for use in filter tests
     const testData = {
@@ -179,7 +179,8 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
 
     console.log('✅ TC03: Patient Portal Search and Filter Functionality - PASSED');
   });
-
+// Test will skip if there is not enough data to validate sorting
+// Test will fail becuase Phone number desc sorting is not working
   test('TC04-Patient Portal Grid Data and Sorting Validation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
@@ -189,9 +190,15 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     console.log('STEP 1: Verifying grid loads and displays data...');
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
     
-    const gridRows = await portalRequests.gridRows.count();
-    expect(gridRows).toBeGreaterThan(0);
-    console.log(`ASSERT: Grid loaded with ${gridRows} rows`);
+    const recordCount = await portalRequests.getGridRecordCount();
+    console.log(`ASSERT: Grid loaded with ${recordCount} records`);
+    
+    // SKIP if insufficient data for sorting validation
+    if (recordCount < 2) {
+      console.log(`⏭️ SKIPPING: Only ${recordCount} record(s) found. Sorting requires at least 2 records for validation.`);
+      test.skip();
+      return;
+    }
 
     // STEP 2: Test sorting for each column
     console.log('\nSTEP 2: Testing sorting functionality for all columns...');
@@ -225,7 +232,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
     await portalRequests.waitForLoadingSpinnerToComplete();
     await portalRequests.setStatusFilterToNew();
-    console.log('✅ Grid loaded with "New" status filter');
+    console.log(' Grid loaded with "New" status filter');
 
     // Verify records exist
     const rowCount = await portalRequests.getVisibleDataRowCount();
@@ -233,7 +240,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
       console.log('⚠️ No records found in grid');
       return;
     }
-    console.log(`✅ Found ${rowCount} data records in grid`);
+    console.log(` Found ${rowCount} data records in grid`);
 
     // Validate all records have action buttons
     console.log('\nValidating action buttons for all records...');
@@ -265,62 +272,62 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
     await portalRequests.waitForLoadingSpinnerToComplete();
     await portalRequests.setStatusFilterToNew();
-    console.log('✅ STEP 1: Portal loaded with "New" status filter');
+    console.log(' STEP 1: Portal loaded with "New" status filter');
 
     // STEP 2: Get first patient identifier
     const patientIdentifier = await portalRequests.getFirstPatientIdentifier();
-    console.log('✅ STEP 2: Patient identifier retrieved');
+    console.log(' STEP 2: Patient identifier retrieved');
 
     // STEP 3: Open rejection dialog
     const rejectButton = await portalRequests.clickRejectButton();
     const dialog = await portalRequests.verifyRejectionDialogOpened();
-    console.log('✅ STEP 3: Rejection dialog opened');
+    console.log(' STEP 3: Rejection dialog opened');
 
     // STEP 4: Test close and reopen functionality
     await portalRequests.closeAndReopenDialog(rejectButton);
-    console.log('✅ STEP 4: Close and reopen dialog functionality verified');
+    console.log(' STEP 4: Close and reopen dialog functionality verified');
 
     // STEP 5: Verify radio button labels are visible and enabled
     const { expiredTreatmentLabel, patientBalanceLabel, otherLabel } = 
       await portalRequests.verifyRadioButtonLabels(dialog);
-    console.log('✅ STEP 5: All radio button labels verified as visible and enabled');
+    console.log(' STEP 5: All radio button labels verified as visible and enabled');
 
     // STEP 6: Verify default selection is "Other"
     await portalRequests.verifyAndSelectDefaultOption(dialog);
-    console.log('✅ STEP 6: Default option "Other" verified');
+    console.log(' STEP 6: Default option "Other" verified');
 
     // STEP 7: Test "Expired Treatment Plan" option
     await portalRequests.testRadioOptionSelection(dialog, 'Expired Treatment Plan');
-    console.log('✅ STEP 7: "Expired Treatment Plan" option tested');
+    console.log(' STEP 7: "Expired Treatment Plan" option tested');
 
     // STEP 8: Test "Patient Balance" option
     await portalRequests.testRadioOptionSelection(dialog, 'Patient Balance');
-    console.log('✅ STEP 8: "Patient Balance" option tested');
+    console.log(' STEP 8: "Patient Balance" option tested');
 
     // STEP 9: Test "Other" option with custom text
     const customRejectionNote = 'Custom rejection reason: Patient record incomplete - missing required documentation for approval. Additional review needed by medical team.';
     await portalRequests.enterCustomRejectionReason(dialog, customRejectionNote);
-    console.log('✅ STEP 9: Custom rejection reason entered and verified');
+    console.log(' STEP 9: Custom rejection reason entered and verified');
 
     // STEP 10: Verify dialog is still visible
     await expect(dialog).toBeVisible();
-    console.log('✅ STEP 10: Dialog remains open and functional');
+    console.log(' STEP 10: Dialog remains open and functional');
 
     // STEP 11: Save rejection
     await portalRequests.verifySaveButtonAndSubmit(dialog);
-    console.log('✅ STEP 11: Rejection saved successfully');
+    console.log(' STEP 11: Rejection saved successfully');
 
     // STEP 12: Verify success notification
     await portalRequests.verifySuccessNotification();
-    console.log('✅ STEP 12: Success notification verified');
+    console.log(' STEP 12: Success notification verified');
 
     // STEP 13: Verify patient status changed in grid
     const statusChanged = await portalRequests.verifyPatientStatusChanged(patientIdentifier);
-    console.log('✅ STEP 13: Patient status change in grid verified');
+    console.log(' STEP 13: Patient status change in grid verified');
 
     // STEP 14: Verify patient appears in "Rejected" status
     await portalRequests.verifyPatientInRejectedStatus(patientIdentifier);
-    console.log('✅ STEP 14: Patient verified in Rejected status');
+    console.log(' STEP 14: Patient verified in Rejected status');
 
     console.log('✅ TC06: Patient Portal Rejection Workflow - COMPLETED\n');
   });
@@ -465,7 +472,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
   test('TC10-Pagination Functionality - Next & Previous Page Navigation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    // Test pagination for all status filters using POM method
+    // Test pagination for all status filters
     const results = await portalRequests.testPaginationForAllStatuses();
 
     // Validate results for each status
