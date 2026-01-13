@@ -26,10 +26,10 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     console.log('✔️ Portal Requests page loaded successfully');
   });
 
-  test('TC01-Patient Portal Default State and Control Visibility', async ({ page }) => {
+  test('Patient Portal Default State and Control Visibility', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC01] Patient Portal Default State and Control Visibility...');
+    console.log('\n➡️ Patient Portal Default State and Control Visibility...');
 
     // Verify Patient Portal is selected by default
     await portalRequests.verifyPatientPortalIsSelected();
@@ -52,10 +52,10 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     console.log('✅ Test completed: Patient Portal default state and all controls verified');
   });
 
-  test('TC02-Patient Portal New Request Creation and Form Validation', async ({ page }) => {
+  test('Patient Portal New Request Creation and Form Validation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC02] Patient Portal New Request Creation and Form Validation...');
+    console.log('\n➡️ Patient Portal New Request Creation and Form Validation...');
 
     // Generate test data using faker
     const testFirstName = faker.person.firstName();
@@ -120,13 +120,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     fs.writeFileSync(dataFilePath, JSON.stringify(testData, null, 2));
     console.log(`STEP 2: Test data saved to ${dataFilePath}`);
 
-    console.log('✅ TC02: Patient Portal New Request Creation and Form Validation - PASSED');
+    console.log('✅ Patient Portal New Request Creation and Form Validation - PASSED');
   });
 
-  test('TC03-Patient Portal Search and Filter Functionality', async ({ page }) => {
+  test('Patient Portal Search and Filter Functionality', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC03] Patient Portal Search and Filter Functionality...');
+    console.log('\n➡️ Patient Portal Search and Filter Functionality...');
 
     // Read test data from file created in TC02
     const dataFilePath = path.join(__dirname, '../data/PatientPortalNewReq.json');
@@ -180,14 +180,14 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     expect(searchInputValue).toBe('');
     console.log('✔️ Reset button clears search criteria');
 
-    console.log('✅ TC03: Patient Portal Search and Filter Functionality - PASSED');
+    console.log('✅ Patient Portal Search and Filter Functionality - PASSED');
   });
 // Test will skip if there is not enough data to validate sorting
 // Test will fail becuase Phone number desc sorting is not working
-  test('TC04-Patient Portal Grid Data and Sorting Validation', async ({ page }) => {
+  test('Patient Portal Grid Data and Sorting Validation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC04] Patient Portal Grid Data and Sorting Validation...');
+    console.log('\n➡️ Patient Portal Grid Data and Sorting Validation...');
 
     // STEP 1: Verify grid loads with data
     console.log('STEP 1: Verifying grid loads and displays data...');
@@ -225,10 +225,10 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     console.log('✅ TC04: Patient Portal Grid Data and Sorting Validation - COMPLETED');
   });
 
-  test('TC05-Patient Portal Action Buttons Validation', async ({ page }) => {
+  test('Patient Portal Action Buttons Validation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC05] Patient Portal Action Buttons Validation\n');
+    console.log('\n➡️ Patient Portal Action Buttons Validation\n');
 
     // Load grid and set filters
     console.log('Loading grid and setting filters...');
@@ -263,13 +263,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     // Summary
     console.log(`📊 SUMMARY:`);
     console.log(`✅ Records Validated: ${validationResult.validatedRows}/${validationResult.totalRows}`);
-    console.log('✅ TC05: Action Buttons Validation - COMPLETED');
+    console.log('✅ Patient Portal Action Buttons Validation - COMPLETED');
   });
-  test('TC06-Patient Portal Rejection Workflow', async ({ page }) => {
+  // this will fail because of radio button not found issue
+  test('Patient Portal Rejection Workflow', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC06] Patient Portal Rejection Workflow - STARTED');
-
+    console.log('\n➡️ Patient Portal Rejection Workflow - STARTED');
     // STEP 1: Verify portal is loaded and set status to "New"
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
     await portalRequests.waitForLoadingSpinnerToComplete();
@@ -331,13 +331,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await portalRequests.verifyPatientInRejectedStatus(patientIdentifier);
     console.log(' STEP 14: Patient verified in Rejected status');
 
-    console.log('✅ TC06: Patient Portal Rejection Workflow - COMPLETED\n');
+    console.log('✅ Patient Portal Rejection Workflow - COMPLETED\n');
   });
 
-  test('TC07-New Request Form Validation - Missing Field Error Messages', async ({ page }) => {
+  test('Patient Portal New Request Form Validation - Missing Field Error Messages', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC07] Form Validation - Missing Field Error Messages\n');
+    console.log('\n➡️ Patient Portal New Request Form Validation - Missing Field Error Messages\n');
 
     // TEST 1: Empty form validation - HTML5 browser validation
     console.log('TEST 1: Empty form submission -...');
@@ -362,13 +362,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
       console.log(`📋 Validation error message: ${invalidEmailError}`);
     }
 
-    console.log('\n✅ TC07: Form Validation Error Message Testing - COMPLETED');
+    console.log('\n✅ Patient Portal New Request Form Validation - Missing Field Error Messages - COMPLETED');
   });
 
-  test('TC08-Status filter dropdown works', async ({ page }) => {
+  test('Patient Portal Status filter dropdown works', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC08] Status filter dropdown functionality...');
+    console.log('\n➡️ Patient Portal Status filter dropdown functionality...');
 
     // Step 1: Verify grid loads with data
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
@@ -421,13 +421,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await portalRequests.resetFilters();
     console.log('✅ STEP 4: Filters reset to original state');
 
-    console.log('✅ TC08: Status filter dropdown functionality - COMPLETED');
+    console.log('✅ Patient Portal Status filter dropdown functionality - COMPLETED');
   });
 
-  test('TC09-Pagination Functionality - Records Per Page Dropdown', async ({ page }) => {
+  test('Patient Portal Pagination Functionality - Records Per Page Dropdown', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC09] Pagination - Records Per Page Dropdown');
+    console.log('\n➡️ Patient Portal Pagination - Records Per Page Dropdown');
 
     // Step 1: Verify grid is loaded
     console.log('\nSTEP 1: Verifying grid is loaded...');
@@ -468,10 +468,10 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
       console.log('⚠️ STEP 4: Page size dropdown not found on this page');
     }
 
-    console.log('\n✅ TC09: Pagination - Records Per Page Dropdown - COMPLETED');
+    console.log('\n✅ Patient Portal Pagination - Records Per Page Dropdown - COMPLETED');
   });
 
-  test('TC10-Pagination Functionality - Next & Previous Page Navigation', async ({ page }) => {
+  test('Patient Portal Pagination Functionality - Next & Previous Page Navigation', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
     // Test pagination for all status filters
@@ -496,13 +496,13 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
       }
     }
 
-    console.log('✅ TC10: All pagination assertions completed successfully');
+    console.log('✅ Patient Portal Pagination Functionality - Next & Previous Page Navigation - COMPLETED');
   });
 
-  test('TC11-Patient Portal Approval Workflow Patient Status Matched', async ({ page }) => {
+  test('Patient Portal Approval Workflow Patient Status Matched', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
-    console.log('\n➡️ [TC11] Patient Portal Approval Workflow - STARTED');
+    console.log('\n➡️ Patient Portal Approval Workflow - STARTED');
 
     // STEP 1: Verify portal is loaded and set status to "New"
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
@@ -576,11 +576,11 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await portalRequests.verifyPatientInApprovedStatus(patientIdentifier, customApprovalNote);
     console.log('✅ STEP 15: Patient verified in Approved status with correct description');
 
-    console.log('✅ TC11: Patient Portal Approval Workflow - COMPLETED\n');
+    console.log('✅ Patient Portal Approval Workflow - COMPLETED\n');
   });
 
   // update this test later there are issues to be discussed
-  test('TC12-Patient Portal Approval Workflow Patient Status Not Matched', async ({ page }) => {
+  test('Patient Portal Approval Workflow Patient Status Not Matched', async ({ page }) => {
     const portalRequests = new PortalRequestsPage(page);
 
     // FIXME: The approval dialog opened after selecting a patient from the Select Patient table
@@ -588,7 +588,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     // The dialog structure may be different for "Not Matched" patients or the dialog was not properly triggered.
     // Need to investigate the actual dialog structure when approving from the Select Patient table.
 
-    console.log('\n➡️ [TC12] Patient Portal Approval Workflow (Not Matched Status) - STARTED');
+    console.log('\n➡️ Patient Portal Approval Workflow (Not Matched Status) - STARTED');
 
     // STEP 1: Verify portal is loaded and set status to "New"
     await expect(portalRequests.patientPortalGrid).toBeVisible({ timeout: 10000 });
@@ -664,7 +664,7 @@ test.describe('Patient Portal New Request Creation and Form Validation', () => {
     await portalRequests.verifySuccessNotification();
     console.log('✅ STEP 11: Success notification verified');
 
-    console.log('✅ TC12: Patient Portal Approval Workflow (Not Matched Status) - COMPLETED\n');
+    console.log('✅ Patient Portal Approval Workflow (Not Matched Status) - COMPLETED\n');
   });
 
 

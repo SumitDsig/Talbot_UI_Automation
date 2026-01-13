@@ -30,10 +30,10 @@ test.describe('Probation Portal Navigation and Default State', () => {
     console.log('✔️ Probation Portal section loaded successfully');
   });
 
-  test('TC01-Verify Probation Portal navigation from Portal Requests', async ({ page }) => {
+  test('Verify Probation Portal navigation from Portal Requests', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC01] Probation Portal Default State and Control Visibility...');
+    console.log('\n➡️ Probation Portal Default State and Control Visibility...');
 
     // Verify Probation Portal is selected by default
     await probationPortal.verifyProbationPortalIsSelected();
@@ -56,10 +56,10 @@ test.describe('Probation Portal Navigation and Default State', () => {
     console.log('✅ Test completed: Probation Portal default state and all controls verified');
   });
 
-  test('TC02-Verify default status selection in Status dropdown', async ({ page }) => {
+  test('Verify default status selection in Status dropdown', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC02] Verify default status selection in Status dropdown...');
+    console.log('\n➡️ Verify default status selection in Status dropdown...');
 
     // Verify default status selection in Status dropdown
     await probationPortal.verifyDefaultStatusSelection();
@@ -73,10 +73,10 @@ test.describe('Probation Portal Navigation and Default State', () => {
     console.log('✅ Test completed: Default status selection and dropdown options verified');
   });
 
-  test('TC03-Verify all grid columns are displayed', async ({ page }) => {
+  test('Verify all grid columns are displayed', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC03] Verify all grid columns are displayed...');
+    console.log('\n➡️ Verify all grid columns are displayed...');
 
     // Verify grid columns are displayed
     const columnCount = await probationPortal.verifyGridColumnsDisplayed();
@@ -87,10 +87,10 @@ test.describe('Probation Portal Navigation and Default State', () => {
     console.log(`✅ Test completed: All ${columnCount} grid columns verified and displayed`);
   });
 
-  test('TC04-Probation Portal New Request Creation and Form Validation', async ({ page }) => {
+  test('Probation Portal New Request Creation and Form Validation', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC04] Probation Portal New Request Creation and Form Validation...');
+    console.log('\n➡️ Probation Portal New Request Creation and Form Validation...');
 
     // Generate test data using faker
     const testFirstName = faker.person.firstName();
@@ -140,13 +140,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     // Verify count incremented
     await probationPortal.verifyGridCountIncremented(initialCount);
 
-    console.log('✅ TC04: Probation Portal New Request Creation and Form Validation - PASSED');
+    console.log('✅ Probation Portal New Request Creation and Form Validation - PASSED');
   });
 
-   test('TC05-Probation Portal Search Functionality', async ({ page }) => {
+   test('Probation Portal Search Functionality', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC05] Probation Portal Search and Filter Functionality...');
+    console.log('\n➡️ Probation Portal Search and Filter Functionality...');
 
     // Get first record data from grid for testing search
     const recordData = await probationPortal.getFirstRecordData();
@@ -215,13 +215,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     await probationPortal.page.waitForTimeout(500);
     await probationPortal.waitForLoadingSpinnerToComplete();
 
-    console.log('\n✅ TC05: Probation Portal Search Functionality - PASSED');
+    console.log('\n✅ Probation Portal Search Functionality - PASSED');
   });
 
-  test('TC06-Probation Portal Reset Button Functionality', async ({ page }) => {
+  test('Probation Portal Reset Button Functionality', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC06] Probation Portal Reset Button Functionality Verification...');
+    console.log('\n➡️ Probation Portal Reset Button Functionality Verification...');
 
     // Capture original grid count before any searches
     const originalGridCount = await probationPortal.getSearchResultCount();
@@ -248,13 +248,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     await probationPortal.verifyResetFunctionality(originalGridCount);
     console.log(`✔️ Reset verified after First Name search`);
 
-    console.log('\n✅ TC06: Probation Portal Reset Button Functionality - PASSED');
+    console.log('\n✅ Probation Portal Reset Button Functionality - PASSED');
   });
 //Ask Sumit about how to verify grid status after filtering by status dropdown as we dont have status column
-  test('TC07-Probation Portal Status Dropdown Filtering', async ({ page }) => {
+  test('Probation Portal Status Dropdown Filtering', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC07] Probation Portal Status Dropdown Filtering...');
+    console.log('\n➡️ Probation Portal Status Dropdown Filtering...');
 
     // STEP 1: Retrieve and verify available status options are visible and enabled
     console.log('\nSTEP 1: Retrieving and verifying status options are visible and enabled...');
@@ -297,13 +297,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     await probationPortal.waitForLoadingSpinnerToComplete();
     console.log('✔️ Filters reset to default state');
 
-    console.log('\n✅ TC07: Probation Portal Status Dropdown Filtering - PASSED');
+    console.log('\n✅ Probation Portal Status Dropdown Filtering - PASSED');
   });
 // add if condition if rows count < 2 skip sorting test
-  test('TC08-Probation Portal Grid Data and Sorting Validation', async ({ page }) => {
+  test('Probation Portal Grid Data and Sorting Validation', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC08] Probation Portal Grid Data and Sorting Validation...');
+    console.log('\n➡️ Probation Portal Grid Data and Sorting Validation...');
 
     // STEP 1: Verify grid loads with data
     console.log('\nSTEP 1: Verifying grid loads and displays data...');
@@ -338,25 +338,25 @@ test.describe('Probation Portal Navigation and Default State', () => {
       await probationPortal.testColumnDualClickSorting(column.index, column.name);
     }
 
-    console.log('\n✅ TC08: Probation Portal Grid Data and Sorting Validation - COMPLETED');
+    console.log('\n✅ Probation Portal Grid Data and Sorting Validation - COMPLETED');
   });
 
-  test('TC09-Verify Approve and Reject buttons are visible and clickable', async ({ page }) => {
+  test('Probation Portal Verify Approve and Reject buttons are visible and clickable', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC09] Verify Approve and Reject buttons are visible and clickable...');
+    console.log('\n➡️ Probation Portal Verify Approve and Reject buttons are visible and clickable...');
 
     // Verify both Approve and Reject buttons are visible and clickable
     await probationPortal.verifyApproveAndRejectButtons();
 
-    console.log(`\n✅ TC09: Approve and Reject buttons verification - PASSED`);
+    console.log(`\n✅ Probation Portal Approve and Reject buttons verification - PASSED`);
   });
 // fix notification locator.
 
-  test('TC10-Probation Portal Approval Workflow', async ({ page }) => {
+  test('Probation Portal Approval Workflow', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC10] Probation Portal Approval Workflow - STARTED');
+    console.log('\n➡️ Probation Portal Approval Workflow - STARTED');
 
     // STEP 1: Verify portal is loaded and status is set to "New"
     await expect(probationPortal.probationPortalGrid).toBeVisible({ timeout: 10000 });
@@ -407,13 +407,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     await probationPortal.verifyApprovedStatusAndRecord(firstName, lastName, approvalNote);
     console.log('STEP 15-18: Approved record verified in filtered grid');
 
-    console.log('TC10: Probation Portal Approval Workflow - COMPLETED\n');
+    console.log('Probation Portal Approval Workflow - COMPLETED\n');
   });
 //test will fail if there is no data with new status
-  test('TC11-Probation Portal Rejection Workflow', async ({ page }) => {
+  test('Probation Portal Rejection Workflow', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC11] Probation Portal Rejection Workflow - STARTED');
+    console.log('\n➡️ Probation Portal Rejection Workflow - STARTED');
 
     // STEP 1: Verify portal is loaded
     await expect(probationPortal.probationPortalGrid).toBeVisible({ timeout: 10000 });
@@ -463,13 +463,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     await probationPortal.verifyRejectedStatusAndRecord(firstName, lastName, rejectionNote);
     console.log('STEP 15-18: Rejected record verified in filtered grid');
 
-    console.log('TC11: Probation Portal Rejection Workflow - COMPLETED\n');
+    console.log('Probation Portal Rejection Workflow - COMPLETED\n');
   });
 
-  test('TC12-Verify Probation Portal thumbnail count matches grid count', async ({ page }) => {
+  test('Probation Portal Verify thumbnail count matches grid count', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC12] Verify Probation Portal thumbnail count matches grid count...');
+    console.log('\n➡️ Probation Portal Verify thumbnail count matches grid count...');
 
     // Step 1: Get current grid count (already on Probation Portal with default "New" status from beforeEach)
     const gridCount = await probationPortal.getGridRecordCount();
@@ -487,13 +487,13 @@ test.describe('Probation Portal Navigation and Default State', () => {
     expect(thumbnailCount).toBe(gridCount);
     console.log(`STEP 4: Thumbnail count (${thumbnailCount}) matches grid count (${gridCount})`);
 
-    console.log('\n✅ TC12: Probation Portal thumbnail count verification - PASSED');
+    console.log('\n✅ Probation Portal thumbnail count verification - PASSED');
   });
 
-  test('TC13-Pagination Functionality - Records Per Page Dropdown', async ({ page }) => {
+  test('Probation Portal Pagination Functionality - Records Per Page Dropdown', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
-    console.log('\n➡️ [TC13] Pagination - Records Per Page Dropdown');
+    console.log('\n➡️ Probation Portal Pagination Functionality - Records Per Page Dropdown');
 
     // Step 1: Verify grid is loaded
     console.log('\nSTEP 1: Verifying grid is loaded...');
@@ -532,10 +532,10 @@ test.describe('Probation Portal Navigation and Default State', () => {
     expect(result.changed).toBe(true);
     console.log('✅ STEP 4b: Page size change functionality verified - dropdown is working correctly');
 
-    console.log('\n✅ TC13: Pagination - Records Per Page Dropdown - COMPLETED');
+    console.log('\n✅ Probation Portal Pagination Functionality - Records Per Page Dropdown - COMPLETED');
   });
 
-  test('TC14-Pagination Functionality - Next & Previous Page Navigation', async ({ page }) => {
+  test('Probation Portal Pagination Functionality - Next & Previous Page Navigation', async ({ page }) => {
     const probationPortal = new ProbationPortalPage(page);
 
     // Test pagination for all status filters using POM method
@@ -560,7 +560,7 @@ test.describe('Probation Portal Navigation and Default State', () => {
       }
     }
 
-    console.log('✅ TC14: All pagination assertions completed successfully');
+    console.log('✅ Probation Portal Pagination Functionality - Next & Previous Page Navigation: All pagination assertions completed successfully');
   });
   
 });
