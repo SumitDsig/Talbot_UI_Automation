@@ -280,7 +280,8 @@ export class Appointocon {
   }
 
   chatMessageInput(chatDialog) {
-    return chatDialog.getByPlaceholder(/type your message/i).first();
+    // The placeholder element is a custom wrapper, find the actual input inside it
+    return chatDialog.locator('patient-textbox-wrapper[placeholder*="Type your message"]').first().locator('input, textarea, [contenteditable]').first();
   }
 
   chatSendButton(chatDialog) {
