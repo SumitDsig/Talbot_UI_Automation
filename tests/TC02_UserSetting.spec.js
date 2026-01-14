@@ -94,16 +94,31 @@ test('TC06 Validate canvas: sign, clear, and confirm canvas is empty', async ({ 
   console.log('➡️ Opening User Settings modal...');
   await dashboard.avatarIcon.click();
   await dashboard.userSettingsButton.click();
+  await expect(dashboard.userSettingsModal).toBeVisible();
 
+  // Wait for modal to fully load
+  await page.waitForTimeout(1000);
+
+  // Click the menu item to ensure Digital Signature section is loaded
+  console.log('➡️ Clicking Set-up Digital Signature menu item to load content...');
+  await dashboard.setupDigitalSignatureMenu.click();
+  
+  // Wait for content to load
+  await page.waitForTimeout(1000);
+
+  // Wait for canvas to be visible (should be available without clicking Sign With SignaturePad)
   console.log('➡️ Waiting for canvas...');
-  await expect(dashboard.signatureCanvas).toBeVisible();
+  await expect(dashboard.signatureCanvas).toBeVisible({ timeout: 10000 });
+  await page.waitForTimeout(1000);
 
   console.log('➡️ Capturing canvas checksum BEFORE drawing...');
-  await page.waitForTimeout(1000);
   const beforeDraw = await dashboard.getCanvasData();
 
   console.log('➡️ Drawing on canvas...');
   await dashboard.drawOnCanvas();
+  
+  // Wait a bit for the drawing to be processed
+  await page.waitForTimeout(500);
 
   console.log('➡️ Capturing canvas checksum AFTER drawing...');
   const afterDraw = await dashboard.getCanvasData();
@@ -113,6 +128,9 @@ test('TC06 Validate canvas: sign, clear, and confirm canvas is empty', async ({ 
 
   console.log('➡️ Clicking Clear button...');
   await dashboard.clearButton.click();
+  
+  // Wait for clear to complete
+  await page.waitForTimeout(500);
 
   console.log('➡️ Capturing canvas checksum AFTER clearing...');
   const afterClear = await dashboard.getCanvasData();

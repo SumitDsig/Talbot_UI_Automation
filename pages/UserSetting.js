@@ -92,40 +92,53 @@ export class DashboardLocators {
         const canvas = this.signatureCanvas;
         await expect(canvas).toBeVisible();
 
+        // Focus the canvas first to ensure it can receive mouse events
+        await canvas.click({ position: { x: 1, y: 1 } });
+        await this.page.waitForTimeout(200);
+
         const box = await canvas.boundingBox();
         if (!box) throw new Error("Canvas not found.");
 
         const w = box.width;
         const h = box.height;
 
-        let x = box.x + w * 0.1;
+        // Start drawing from a point inside the canvas
+        let x = box.x + w * 0.2;
         let y = box.y + h * 0.5;
 
+        // Move to starting position
         await this.page.mouse.move(x, y);
+        await this.page.waitForTimeout(100);
+        
+        // Start drawing
         await this.page.mouse.down();
+        await this.page.waitForTimeout(50);
 
         const strokes = Math.floor(Math.random() * 4) + 5;
 
         for (let i = 0; i < strokes; i++) {
-            x += Math.floor(Math.random() * (w * 0.15)) + 30;
+            x += Math.floor(Math.random() * (w * 0.15)) + 20;
             let yOffset = Math.floor(Math.random() * 40) * (Math.random() > 0.5 ? 1 : -1);
             y = Math.max(box.y + 10, Math.min(box.y + h - 10, y + yOffset));
 
-            await this.page.mouse.move(x, y, { steps: 15 });
-
-            await this.page.waitForTimeout(80);
+            await this.page.mouse.move(x, y, { steps: 20 });
+            await this.page.waitForTimeout(100);
         }
 
         await this.page.mouse.up();
-        await this.page.keyboard.press('Enter');
+        await this.page.waitForTimeout(200);
     }
 
     // Canvas checksum
     async getCanvasData() {
         return await this.page.evaluate(() => {
             const canvas = document.querySelector('signature-pad canvas');
+            if (!canvas) {
+                throw new Error('Canvas not found');
+            }
             const ctx = canvas.getContext('2d');
             const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            // Sum all pixel values (R, G, B, A channels)
             return data.reduce((n, v) => n + v, 0);
         });
     }
